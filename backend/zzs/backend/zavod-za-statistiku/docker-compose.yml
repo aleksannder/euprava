@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    container_name: zzs-postgres
+    environment:
+      POSTGRES_DB: zzs
+      POSTGRES_USER: zzs
+      POSTGRES_PASSWORD: zzs
+    ports:
+      - "5432:5432"
+    volumes:
+      - zzsdb:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    command: start-dev --http-port=8081
+    environment:
+      KC_DB: dev-mem
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+
+volumes:
+  zzsdb: {}
