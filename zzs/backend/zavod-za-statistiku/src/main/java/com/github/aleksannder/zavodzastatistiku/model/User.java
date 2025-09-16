@@ -14,7 +14,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Builder
-@Table(name = "user")
+@Table(name = "users")
 public class User {
 
     @Id
