@@ -16,12 +16,14 @@ services:
 
   keycloak:
     image: quay.io/keycloak/keycloak:24.0
-    command: start-dev --http-port=8081
+    command: start-dev --http-port=8081 --import-realm
     environment:
       KC_DB: dev-mem
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
     restart: unless-stopped
+    volumes:
+      - ./keycloak/import:/opt/keycloak/data/import
     ports:
       - "8081:8081"
 
