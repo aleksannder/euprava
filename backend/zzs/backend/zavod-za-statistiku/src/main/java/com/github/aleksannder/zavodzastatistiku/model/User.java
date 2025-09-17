@@ -31,8 +31,6 @@ public class User {
 
     private String lastName;
 
-    private Boolean enabled = true;
-
     @CreationTimestamp
     private Instant createdAt;
 
