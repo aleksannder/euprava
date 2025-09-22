@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,9 +31,9 @@ public class AuthController {
     }
 
     @PostMapping(value = "/register", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<UserRegisterResponseDto> register(@Valid @RequestBody UserRegisterRequestDto userRegisterRequestDto) {
+    public ResponseEntity<?> register(@Valid @RequestBody UserRegisterRequestDto userRegisterRequestDto) {
         User u = userService.registerUser(userRegisterRequestDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(UserRegisterResponseDto.of(u));
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("success", true));
     }
 
 }

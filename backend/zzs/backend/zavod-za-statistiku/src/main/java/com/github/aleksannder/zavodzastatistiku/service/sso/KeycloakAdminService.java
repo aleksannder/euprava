@@ -102,9 +102,7 @@ public class KeycloakAdminService {
                                         .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
                                         .map(u -> new UserRegisterResponseDto(
                                                 (String) u.get("id"),
-                                                (String) u.get("email"),
-                                                true,
-                                                true
+                                                (String) u.get("email")
                                         ))
                                 )
                 );
