@@ -1,0 +1,93 @@
+<div class="container mt-5">
+
+  <app-custom-alert
+    *ngIf="showAlert"
+    [message]="alertMessage"
+    [type]="alertType"
+    (closed)="closeAlert()">
+  </app-custom-alert>
+
+  <div class="d-flex justify-content-center mb-4" *ngIf="!isEmployer">
+    <button class="btn btn-primary me-2" (click)="openOruzjeModal()">Podnesi zahtev za oružje</button>
+    <button class="btn btn-warning" (click)="produziSveZahteve()" *ngIf="mozeProduziti">
+      Produži zahteve
+    </button>
+  </div>
+
+
+
+  <h3 class="mb-3 text-center">
+    {{ isEmployer ? 'Zahtevi za oružje' : 'Dozvola za oružje' }}
+  </h3>
+  <div class="table-responsive">
+    <table class="table table-striped table-bordered">
+      <thead class="table-dark">
+      <tr>
+        <th *ngIf="isEmployer">#</th>
+        <th>Ime</th>
+        <th>Prezime</th>
+        <th>Datum od</th>
+        <th>Datum do</th>
+        <th>Reg. broj</th>
+        <th>Kategorija</th>
+        <th *ngIf="isEmployer">Status</th>
+        <th *ngIf="isEmployer">Akcija</th>
+      </tr>
+      </thead>
+      <tbody>
+      <ng-container *ngFor="let oruzje of oruzja; let i = index">
+        <tr *ngIf="isEmployer || oruzje.status === 'DOZVOLJEN'">
+          <td *ngIf="isEmployer">{{ i + 1 }}</td>
+          <td>{{ oruzje.ime }}</td>
+          <td>{{ oruzje.prezime }}</td>
+          <td>{{ oruzje.datumOd | date:'dd.MM.yyyy' }}</td>
+          <td>{{ oruzje.datumDo | date:'dd.MM.yyyy' }}</td>
+          <td>{{ oruzje.regBroj }}</td>
+          <td>{{ oruzje.kategorijaOruzja }}</td>
+          <td *ngIf="isEmployer">{{ oruzje.status }}</td>
+          <td *ngIf="isEmployer">
+            <ng-container *ngIf="oruzje.status !== 'DOZVOLJEN' && oruzje.status !== 'ODBIJEN' && oruzje.status !== 'IZGUBLJEN'">
+              <button class="btn btn-success btn-sm me-2" (click)="prihvatiZahtev(oruzje.id)">Prihvati</button>
+              <button class="btn btn-danger btn-sm" (click)="odbijZahtev(oruzje.id)">Odbij</button>
+            </ng-container>
+          </td>
+        </tr>
+      </ng-container>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="modal fade" id="oruzjeModal" #oruzjeModal tabindex="-1" aria-labelledby="oruzjeModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="oruzjeModalLabel">Podnesi zahtev za oružje</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form #oruzjeForm="ngForm" (ngSubmit)="podnesiZahtev(oruzjeForm)">
+            <div class="mb-3">
+              <label for="kategorijaOruzja" class="form-label">Kategorije oružja</label>
+              <select class="form-select" id="kategorijaOruzja" name="kategorijaOruzja"
+                      [(ngModel)]="noviZahtev.kategorijaOruzja"
+                      multiple
+                      required #katModel="ngModel">
+                <option *ngFor="let kat of kategorijeOpcije" [value]="kat">{{ kat }}</option>
+              </select>
+              <div class="text-danger" *ngIf="katModel.invalid && katModel.touched">
+                Morate izabrati bar jednu kategoriju.
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zatvori</button>
+              <button type="submit" class="btn btn-primary" [disabled]="oruzjeForm.invalid">Podnesi zahtev</button>
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

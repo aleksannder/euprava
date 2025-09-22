@@ -1,0 +1,72 @@
+<header>
+  <h1>Dobrodošli u eUpravu MUP-a</h1>
+  <p>Brzo i jednostavno do vaših dokumenata</p>
+</header>
+
+<div class="container">
+  <a routerLink="/licna" class="card-link">
+    <div class="card">
+      <h2>Lična karta</h2>
+      <ul>
+        <li>Proverite status vaše lične karte</li>
+        <li>Zatražite izdavanje nove lične karte</li>
+        <li>Produžite vašu postojeću ličnu kartu</li>
+      </ul>
+    </div>
+  </a>
+
+  <a routerLink="/vozacka" class="card-link">
+    <div class="card">
+      <h2>Vozačka dozvola</h2>
+      <ul>
+        <li>Proverite status vozačke dozvole</li>
+        <li>Zatražite izdavanje vozačke dozvole</li>
+        <li>Produžite vašu vozačku dozvolu</li>
+      </ul>
+    </div>
+  </a>
+
+  <a routerLink="/saobracajna" class="card-link">
+    <div class="card">
+      <h2>Saobraćajna dozvola</h2>
+      <ul>
+        <li>Proverite status saobraćajne dozvole</li>
+        <li>Zatražite izdavanje saobraćajne dozvole</li>
+        <li>Produžite vašu saobraćajnu dozvolu</li>
+      </ul>
+    </div>
+  </a>
+
+  <a routerLink="/oruzje" class="card-link">
+    <div class="card">
+      <h2>Dozvola za oružje</h2>
+      <ul>
+        <li>Proverite status vaše dozvole za oružje</li>
+        <li>Zatražite novu dozvolu za oružje</li>
+        <li>Produžite vašu postojeću dozvolu</li>
+      </ul>
+    </div>
+  </a>
+
+  <a routerLink="/ostalo" class="card-link" *ngIf="!isEmployer">
+    <div class="card">
+      <h2>Ostalo</h2>
+      <ul>
+        <li>Prikaz zahteva</li>
+        <li>Prijava gubitka dokumenata</li>
+        <li>Matični izvod</li>
+        <li>Osudjivan</li>
+      </ul>
+    </div>
+  </a>
+
+</div>
+
+<div class="notifications">
+  <strong>Obaveštenja:</strong>
+  <ul>
+    <li>Svi zahtevi podneti posle 15.09.2025. biće obrađeni u roku od 10 radnih dana.</li>
+    <li>Novi pravilnik o izdavanju ličnih karata važi od 01.10.2025.</li>
+    <li>Za sva pitanja kontaktirajte info@mup.rs</li>
+  </ul>
+</div>

@@ -1,0 +1,26 @@
+<div class="profile-page">
+  <div class="profile-card">
+    <div class="profile-avatar">
+      <img [src]="imagePath" alt="User Avatar">
+    </div>
+
+    <h3 class="profile-title">Profil</h3>
+
+    <div class="profile-field">
+      <label>First Name</label>
+      <input type="text" [value]="user?.ime" readonly>
+    </div>
+    <div class="profile-field">
+      <label>Last Name</label>
+      <input type="text" [value]="user?.prezime" readonly>
+    </div>
+    <div class="profile-field">
+      <label>Email</label>
+      <input type="email" [value]="user?.email" readonly>
+    </div>
+    <div class="profile-field">
+      <label>Role</label>
+      <input type="text" [value]="user?.rola" readonly>
+    </div>
+  </div>
+</div>

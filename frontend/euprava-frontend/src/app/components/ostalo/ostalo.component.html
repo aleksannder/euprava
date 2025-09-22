@@ -1,0 +1,102 @@
+<div class="container mt-4" *ngIf="!isEmployer">
+  <h2 class="mb-3 text-center">📋 Moji zahtevi</h2>
+
+
+  <div class="table-responsive" *ngIf="zahtevi.length > 0; else nemaZahteva">
+    <table class="table table-striped table-hover table-bordered align-middle shadow-sm">
+      <thead class="table-primary text-center">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Tip</th>
+        <th scope="col">Status</th>
+        <th scope="col">Datum slanja</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let z of zahtevi; let i = index" class="text-center">
+        <td>{{ i + 1 }}</td>
+        <td><span class="badge bg-secondary">{{ z.tip }}</span></td>
+        <td>
+            <span [ngClass]="{
+              'badge bg-success': z.status === 'ODOBREN',
+              'badge bg-danger': z.status === 'ODBIJEN',
+              'badge bg-warning text-dark': z.status === 'NA ČEKANJU'
+            }">
+              {{ z.status }}
+            </span>
+        </td>
+        <td>{{ z.datumPodnosenja | date: 'dd.MM.yyyy' }}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ng-template #nemaZahteva>
+    <p class="text-center text-muted mt-4">Nema pronađenih zahteva.</p>
+  </ng-template>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <h5 class="card-title">Prijava izgubljenog dokumenta</h5>
+      <div class="d-flex align-items-center">
+        <select class="form-select me-2" [(ngModel)]="selectedDokument" name="selectedDokument">
+          <option value="" disabled selected>Izaberite dokument</option>
+          <option *ngFor="let doc of aktivniDokumenti" [value]="doc.tip">{{ doc.tip }}</option>
+        </select>
+        <button class="btn btn-danger" (click)="prijaviIzgubljeniDokument()" [disabled]="!selectedDokument">
+          Prijavi
+        </button>
+      </div>
+    </div>
+  </div>
+<app-custom-alert
+  *ngIf="showAlert"
+  [message]="alertMessage"
+  [type]="alertType"
+  (closed)="closeAlert()">
+</app-custom-alert>
+
+<div class="card mt-4">
+  <div class="card-body">
+    <h5 class="card-title">📑 Izvod iz matične knjige</h5>
+    <button class="btn btn-info mb-3" (click)="toggleMaticna()">
+      {{ prikaziMaticnu ? 'Sakrij podatke' : 'Prikaži podatke' }}
+    </button>
+
+    <div *ngIf="prikaziMaticnu && maticnaPodaci" class="table-responsive">
+      <table class="table table-bordered table-striped">
+        <tbody>
+        <tr>
+          <th>Ime</th>
+          <td>{{ maticnaPodaci.ime }}</td>
+        </tr>
+        <tr>
+          <th>Prezime</th>
+          <td>{{ maticnaPodaci.prezime }}</td>
+        </tr>
+        <tr>
+          <th>JMBG</th>
+          <td>{{ maticnaPodaci.jmbg }}</td>
+        </tr>
+        <tr>
+          <th>Datum rođenja</th>
+          <td>{{ maticnaPodaci.datumRodjenja | date:'dd.MM.yyyy' }}</td>
+        </tr>
+        <tr>
+          <th>Mesto rođenja</th>
+          <td>{{ maticnaPodaci.grad }}</td>
+        </tr>
+        <tr>
+          <th>Adresa</th>
+          <td>{{ maticnaPodaci.adresa }}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="prikaziMaticnu && !maticnaPodaci" class="text-muted">
+      Podaci nisu dostupni.
+    </div>
+  </div>
+</div>
+</div>

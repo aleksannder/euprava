@@ -1,0 +1,119 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+main.page-content {
+  flex: 1 0 auto;
+}
+.global-footer {
+  flex-shrink: 0;
+  background-color: #004080;
+  color: white;
+  text-align: center;
+  padding: 18px 15px;
+  font-size: 14px;
+  width: 100%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.footer-text {
+  display: flex;
+  align-items: center;
+}
+
+.navbar {
+  background-color: #ffffff;
+  padding: 0.5rem 2rem;
+  font-family: 'Segoe UI', sans-serif;
+  flex-shrink: 0;
+}
+
+#logo {
+  width: 40px;
+  height: 40px;
+  transition: transform 0.3s ease;
+}
+
+.navbar-brand h4 {
+  transition: transform 0.3s ease;
+}
+
+.navbar-brand:hover img,
+.navbar-brand:hover h4 {
+  transform: scale(1.1);
+}
+
+.main-link {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #333;
+  margin-left: 2rem;
+  transition: transform 0.3s ease, color 0.3s ease;
+  cursor: pointer;
+}
+
+.main-link:hover {
+  transform: scale(1.15);
+}
+
+.profile-icon {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  object-fit: cover;
+}
+
+.profile-icon:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.profile-menu {
+  position: absolute;
+  top: 55px;
+  right: 0;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  min-width: 180px;
+  text-align: center;
+  z-index: 1000;
+  overflow: hidden;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.profile-menu-item {
+  display: block;
+  width: 100%;
+  padding: 12px 20px;
+  color: #333;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1.2rem;
+  transition: background-color 0.2s ease, transform 0.3s ease;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.profile-menu-item:hover {
+  background-color: #f1f1f1;
+  transform: scale(1.05)
+}
+
+.navbar .container-fluid {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.profile-container {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}

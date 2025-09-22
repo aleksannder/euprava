@@ -1,0 +1,119 @@
+<app-custom-alert
+  *ngIf="showModal"
+  [message]="alertMessage"
+  [type]="alertType"
+  (closed)="handleModalClose()">
+</app-custom-alert>
+
+<section class="vh-100 signup-section">
+  <div class="container h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="col-lg-12 col-xl-11">
+        <div class="card signup-card">
+          <div class="row g-0 h-100">
+
+            <div class="col-md-6 d-flex flex-column form-column">
+              <div class="p-4 p-md-5 form-container-padding w-100">
+                <p class="text-center h1 fw-bold mb-3">Registracija</p>
+
+                <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+
+                  <div class="mb-2">
+                    <label for="ime" class="form-label">Ime</label>
+                    <input id="ime" type="text" class="form-control form-control-sm" formControlName="ime" placeholder="Unesite vase ime">
+                    <div class="text-danger mt-1" *ngIf="ime?.touched && ime?.hasError('required')">
+                      Ime je obavezno.
+                    </div>
+                  </div>
+
+                  <div class="mb-2">
+                    <label for="prezime" class="form-label">Prezime</label>
+                    <input id="prezime" type="text" class="form-control form-control-sm" formControlName="prezime" placeholder="Unesite vase prezime">
+                    <div class="text-danger mt-1" *ngIf="prezime?.touched && prezime?.hasError('required')">
+                      Prezime je obavezno.
+                    </div>
+                  </div>
+
+                  <div class="mb-2">
+                    <label for="datumRodjenja" class="form-label">Datum rođenja</label>
+                    <input id="datumRodjenja" type="date" class="form-control form-control-sm" formControlName="datumRodjenja" max="{{ today }}">
+                    <div class="text-danger mt-1" *ngIf="datumRodjenja?.touched && datumRodjenja?.invalid">
+                      <span *ngIf="datumRodjenja?.hasError('required')">Datum rođenja je obavezan.</span>
+                      <span *ngIf="datumRodjenja?.hasError('futureDate')">Datum rođenja mora biti u prošlosti.</span>
+                    </div>
+                  </div>
+
+                  <div class="mb-2">
+                    <label class="form-label">Pol</label>
+                    <div class="d-flex gap-3">
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" id="muski" value="M" formControlName="pol">
+                        <label class="form-check-label" for="muski">Muški</label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" id="zenski" value="Ž" formControlName="pol">
+                        <label class="form-check-label" for="zenski">Ženski</label>
+                      </div>
+                    </div>
+                    <div class="text-danger mt-1" *ngIf="pol?.touched && pol?.hasError('required')">
+                      Pol je obavezan.
+                    </div>
+                  </div>
+
+                  <div class="mb-2">
+                    <label for="email" class="form-label">Email</label>
+                    <input id="email" type="email" class="form-control form-control-sm" formControlName="email" placeholder="Unesite vas email">
+                    <div class="text-danger mt-1" *ngIf="email?.touched">
+                      <span *ngIf="email?.hasError('required')">Email je obavezan.</span>
+                      <span *ngIf="email?.hasError('email') || email?.hasError('pattern')">Email mora biti u formatu @gmail.com.</span>
+                    </div>
+                  </div>
+
+                  <div class="mb-2">
+                    <label for="lozinka" class="form-label">Sifra</label>
+                    <input id="lozinka" type="password" class="form-control form-control-sm" formControlName="lozinka" placeholder="Unesite vasu sifru">
+                    <div class="text-danger mt-1" *ngIf="lozinka?.touched">
+                      <span *ngIf="lozinka?.hasError('required')">Lozinka je obavezna.</span>
+                      <span *ngIf="lozinka?.hasError('minlength')">Lozinka mora imati najmanje 8 karaktera.</span>
+                      <span *ngIf="lozinka?.hasError('pattern')">Lozinka mora sadržati veliko slovo, malo slovo i specijalan znak.</span>
+                    </div>
+                  </div>
+
+                  <div class="mb-2">
+                    <label for="grad" class="form-label">Grad</label>
+                    <input id="grad" type="text" class="form-control form-control-sm" formControlName="grad" placeholder="Unesite grad">
+                    <div class="text-danger mt-1" *ngIf="grad?.touched && grad?.hasError('required')">
+                      Grad je obavezan.
+                    </div>
+                  </div>
+
+                  <div class="mb-2">
+                    <label for="adresa" class="form-label">Adresa</label>
+                    <input id="adresa" type="text" class="form-control form-control-sm" formControlName="adresa" placeholder="Unesite adresu">
+                    <div class="text-danger mt-1" *ngIf="adresa?.touched && adresa?.hasError('required')">
+                      Adresa je obavezna.
+                    </div>
+                  </div>
+
+                  <button type="submit" class="btn btn-dark w-100 mb-2" [disabled]="!registerForm.valid">
+                    Registracija
+                  </button>
+
+                  <p class="text-center mt-2 mb-0">
+                    Vec imas nalog?
+                    <a class="login-link" (click)="goToLogin()">Uloguj se</a>
+                  </p>
+                </form>
+              </div>
+            </div>
+
+            <div class="col-md-6 d-none d-md-block">
+              <img [src]="imagePath" alt="Signup image" class="img-fluid signup-image">
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

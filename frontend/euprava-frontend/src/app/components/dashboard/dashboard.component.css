@@ -1,0 +1,138 @@
+:host {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f7fa;
+  width: 100%;
+}
+
+
+header {
+  background: linear-gradient(135deg, #004080, #0066cc);
+  color: white;
+  padding: 30px 20px;
+  text-align: center;
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 32px;
+  letter-spacing: 1px;
+}
+
+header p {
+  margin: 10px 0 0;
+  font-size: 18px;
+  font-weight: 400;
+}
+
+.container {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: 25px;
+  padding: 30px 15px;
+  overflow-x: auto;
+}
+
+.card-link, .card {
+  flex: 1 1 280px;
+  max-width: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+}
+
+.card {
+  background-color: white;
+  border-radius: 15px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+  padding: 25px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(0, 102, 204, 0.1), transparent 70%);
+  transform: rotate(25deg);
+  transition: all 0.5s ease;
+}
+
+.card:hover::before {
+  transform: rotate(0deg);
+}
+
+.card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+}
+
+.card h2 {
+  color: #004080;
+  margin-bottom: 15px;
+  font-size: 20px;
+}
+
+.card ul {
+  list-style: none;
+  padding: 0;
+  font-size: 15px;
+  text-align: left;
+  color: #333;
+}
+
+.card ul li {
+  margin-bottom: 10px;
+  padding-left: 25px;
+  position: relative;
+}
+
+.card ul li::before {
+  content: "✔";
+  color: #0066cc;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+
+.notifications {
+  background-color: #fff8c6;
+  border-left: 6px solid #ffcc00;
+  margin: 20px auto;
+  padding: 20px 25px;
+  max-width: 850px;
+  border-radius: 10px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+footer {
+  background-color: #004080;
+  color: white;
+  text-align: center;
+  padding: 18px 15px;
+  margin-top: auto;
+  font-size: 14px;
+}
+.card-link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1 1 280px;
+  max-width: 300px;
+}
