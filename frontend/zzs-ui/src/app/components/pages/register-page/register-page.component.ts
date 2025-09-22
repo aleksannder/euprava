@@ -6,6 +6,9 @@ import {MatError, MatFormField, MatLabel} from '@angular/material/form-field';
 import {MatIcon} from '@angular/material/icon';
 import {MatInput} from '@angular/material/input';
 import {NgIf} from '@angular/common';
+import {KeycloakService} from '../../../services/auth/keycloak.service';
+import {AuthService} from '../../../services/auth/auth.service';
+import {RegisterUserRequest, Role} from '../../../model/register-user.model';
 
 @Component({
   selector: 'app-register-page',
@@ -27,13 +30,16 @@ import {NgIf} from '@angular/common';
     ReactiveFormsModule
   ],
   templateUrl: './register-page.component.html',
-  styleUrl: './register-page.component.scss'
+  styleUrl: './register-page.component.scss',
+  providers: [AuthService]
 })
 export class RegisterPageComponent {
   registerForm: FormGroup;
   hide = true;
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder,
+              private authService: AuthService
+  ) {
     this.registerForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       firstName: ['', [Validators.required]],
@@ -44,7 +50,12 @@ export class RegisterPageComponent {
 
   onSubmit() {
     if (this.registerForm.valid) {
-      console.log(this.registerForm.value);
+      const registerUserRequest: RegisterUserRequest = this.registerForm.value as RegisterUserRequest;
+      registerUserRequest.role = Role.CITIZEN;
+      this.authService.registerUser(registerUserRequest).subscribe({
+        next: (res) => console.log('registered: ', res),
+        error: (err) => console.error(err),
+      })
     }
   }
 }

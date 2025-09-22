@@ -3,6 +3,7 @@ package com.github.aleksannder.zavodzastatistiku.model;
 import com.github.aleksannder.zavodzastatistiku.model.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
@@ -13,7 +14,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @Table(name = "users")
 public class User {
 

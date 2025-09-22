@@ -32,12 +32,12 @@ public class UserService {
             throw new ValidationException("Email already exists");
         }
 
-        User u = new User();
-        u.setFirstName(userRegisterRequestDto.firstName());
-        u.setLastName(userRegisterRequestDto.lastName());
-        u.setEmail(userRegisterRequestDto.email().toLowerCase());
-        u.setPassword(passwordEncoder.encode(userRegisterRequestDto.password()));
-        u.setCreatedAt(Instant.now());
+        User u = User.builder()
+                        .firstName(userRegisterRequestDto.firstName())
+                                .lastName(userRegisterRequestDto.lastName())
+                                        .email(userRegisterRequestDto.email())
+                                                .password(passwordEncoder.encode(userRegisterRequestDto.password()))
+                                                        .createdAt(Instant.now()).build();
 
 
         switch (userRegisterRequestDto.role()) {
