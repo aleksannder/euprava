@@ -6,6 +6,8 @@ import {MatError, MatFormField, MatLabel} from '@angular/material/form-field';
 import {MatInput} from '@angular/material/input';
 import {MatButton, MatIconButton} from '@angular/material/button';
 import {NgIf} from '@angular/common';
+import {AuthService} from '@auth0/auth0-angular';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-login-page',
@@ -23,25 +25,35 @@ import {NgIf} from '@angular/common';
     MatIconButton,
     MatButton,
     MatCardContent,
-    NgIf
+    NgIf,
+    RouterLink
   ],
-  templateUrl: './login-page.component.html',
-  styleUrl: './login-page.component.scss'
+  templateUrl: `./login-page.component.html`,
+  styleUrl: './login-page.component.scss',
+  providers: [AuthService]
 })
 export class LoginPageComponent {
-  loginForm: FormGroup;
-  hide = true;
+    loginForm: FormGroup;
 
-  constructor(private fb: FormBuilder) {
-    this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(8)]],
-    });
-  }
-
-  onSubmit() {
-    if (this.loginForm.valid) {
-      console.log(this.loginForm.value);
+    constructor(public auth: AuthService, private fb: FormBuilder) {
+      this.loginForm = this.fb.group({
+        email: ['', [Validators.required, Validators.email]],
+      })
     }
-  }
+
+    onSubmit(): void {
+      if (this.loginForm.invalid) {
+        return;
+      }
+      const email = (this.loginForm.value.email as string)?.trim();
+
+      try {
+        this.auth.loginWithRedirect({
+          authorizationParams: email ? {login_hint: email} : {},
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
 }
