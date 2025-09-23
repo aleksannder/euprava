@@ -1,0 +1,159 @@
+<div class="container mt-5">
+
+  <app-custom-alert
+    *ngIf="showAlert"
+    [message]="alertMessage"
+    [type]="alertType"
+    (closed)="closeAlert()">
+  </app-custom-alert>
+
+  <div class="d-flex justify-content-center mb-4 gap-2" *ngIf="!isEmployer">
+    <button class="btn btn-primary" (click)="openSaobracajnaModal()">
+      Zahtev za saobraćajnu dozvolu
+    </button>
+
+    <button class="btn btn-warning" (click)="produziSaobracajnu()" *ngIf="mozeProduziti">
+      Produži saobraćajnu dozvolu
+    </button>
+  </div>
+
+
+  <h3 class="mb-3 text-center">
+    {{ isEmployer ? 'Zahtevi za saobraćajne dozvole' : 'Moje saobraćajne dozvole' }}
+  </h3>
+  <div class="table-responsive">
+    <table class="table table-striped table-bordered">
+      <thead class="table-dark">
+      <tr>
+        <th>#</th>
+        <th>Ime</th>
+        <th>Prezime</th>
+        <th>Adresa</th>
+        <th>Marka</th>
+        <th>Model</th>
+        <th>Kubikaža</th>
+        <th>Godište</th>
+        <th>Vrsta pogona</th>
+        <th>Tablice</th>
+        <th>Izdato</th>
+        <th>Važi do</th>
+        <th>Broj dozvole</th>
+        <th *ngIf="isEmployer">Status</th>
+        <th *ngIf="isEmployer">Akcija</th>
+      </tr>
+      </thead>
+      <tbody>
+      <ng-container *ngFor="let s of saobracajne; let i = index">
+        <tr *ngIf="isEmployer || s.status === 'DOZVOLJEN'">
+          <td>{{ i + 1 }}</td>
+          <td>{{ s.ime }}</td>
+          <td>{{ s.prezime }}</td>
+          <td>{{ s.adresa }}</td>
+          <td>{{ s.marka }}</td>
+          <td>{{ s.model }}</td>
+          <td>{{ s.kubikaza }}</td>
+          <td>{{ s.godiste }}</td>
+          <td>{{ s.vrstaPogona }}</td>
+          <td>{{ s.tablice }}</td>
+          <td>{{ s.datumIzdavanja | date:'dd.MM.yyyy' }}</td>
+          <td>{{ s.datumVazenja | date:'dd.MM.yyyy' }}</td>
+          <td>{{ s.brojDozvole }}</td>
+          <td *ngIf="isEmployer">{{ s.status }}</td>
+          <td *ngIf="isEmployer">
+            <ng-container *ngIf="s.status !== 'DOZVOLJEN' && s.status !== 'ODBIJEN' && s.status !== 'IZGUBLJEN'">
+              <button class="btn btn-success btn-sm me-2" (click)="prihvatiZahtev(s.id)">Prihvati</button>
+              <button class="btn btn-danger btn-sm" (click)="odbijZahtev(s.id)">Odbij</button>
+            </ng-container>
+          </td>
+        </tr>
+      </ng-container>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="modal fade" id="saobracajnaModal" #saobracajnaModal tabindex="-1" aria-labelledby="saobracajnaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="saobracajnaModalLabel">Podnesi zahtev za saobraćajnu dozvolu</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zatvori"></button>
+        </div>
+        <div class="modal-body">
+          <form #saobracajnaForm="ngForm" (ngSubmit)="podnesiZahtev(saobracajnaForm)">
+
+            <div class="mb-3">
+              <label for="marka" class="form-label">Marka</label>
+              <input type="text" class="form-control" id="marka" name="marka"
+                     [(ngModel)]="noviZahtev.marka" required #markaCtrl="ngModel">
+              <div class="text-danger" *ngIf="markaCtrl.invalid && markaCtrl.touched">
+                Marka je obavezna.
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="model" class="form-label">Model</label>
+              <input type="text" class="form-control" id="model" name="model"
+                     [(ngModel)]="noviZahtev.model" required #modelCtrl="ngModel">
+              <div class="text-danger" *ngIf="modelCtrl.invalid && modelCtrl.touched">
+                Model je obavezan.
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="kubikaza" class="form-label">Kubikaža</label>
+              <input type="number" class="form-control" id="kubikaza" name="kubikaza"
+                     [(ngModel)]="noviZahtev.kubikaza" required #kubikazaCtrl="ngModel">
+              <div class="text-danger" *ngIf="kubikazaCtrl.invalid && kubikazaCtrl.touched">
+                Kubikaža je obavezna.
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="godiste" class="form-label">Godište</label>
+              <input type="number" class="form-control" id="godiste" name="godiste"
+                     [(ngModel)]="noviZahtev.godiste"
+                     [max]="trenutnaGodina"
+                     required #godisteCtrl="ngModel">
+              <div class="text-danger" *ngIf="godisteCtrl.errors?.['required'] && godisteCtrl.touched">
+                Godište je obavezno.
+              </div>
+              <div class="text-danger" *ngIf="godisteCtrl.errors?.['max'] && godisteCtrl.touched">
+                Godište ne može biti posle {{ trenutnaGodina }}.
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="vrstaPogona" class="form-label">Vrsta pogona</label>
+              <input type="text" class="form-control" id="vrstaPogona" name="vrstaPogona"
+                     [(ngModel)]="noviZahtev.vrstaPogona" required #vrstaCtrl="ngModel">
+              <div class="text-danger" *ngIf="vrstaCtrl.invalid && vrstaCtrl.touched">
+                Vrsta pogona je obavezna.
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="tablice" class="form-label">Tablice</label>
+              <input type="text" class="form-control" id="tablice" name="tablice"
+                     [(ngModel)]="noviZahtev.tablice"
+                     pattern="^[A-Z]{2}-\d{3,4}-[A-Z]{2}$"
+                     required #tabliceCtrl="ngModel">
+              <div class="text-danger" *ngIf="tabliceCtrl.errors?.['required'] && tabliceCtrl.touched">
+                Tablice su obavezne.
+              </div>
+              <div class="text-danger" *ngIf="tabliceCtrl.errors?.['pattern'] && tabliceCtrl.touched">
+                Format tablica mora biti npr. VA-1022-TX.
+              </div>
+            </div>
+
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zatvori</button>
+              <button type="submit" class="btn btn-primary" [disabled]="saobracajnaForm.invalid">Podnesi zahtev</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

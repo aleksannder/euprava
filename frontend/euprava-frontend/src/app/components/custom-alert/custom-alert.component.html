@@ -1,0 +1,6 @@
+<div class="custom-alert-wrapper">
+  <div class="custom-alert" [ngClass]="{ 'success': type === 'success', 'error': type === 'error' }">
+    <div class="message">{{ message }}</div>
+    <button class="close-btn" (click)="close()">OK</button>
+  </div>
+</div>

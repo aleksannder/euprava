@@ -1,0 +1,42 @@
+<nav *ngIf="isLoggedIn" class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+  <div class="container-fluid d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center">
+      <a class="navbar-brand d-flex align-items-center me-4" style="cursor: pointer;" (click)="goToDashboard()">
+        <img [src]="imagePath" id="logo" alt="eUprava Logo" loading="lazy">
+        <h4 class="ms-2 mb-0">eUprava</h4>
+      </a>
+
+      <a class="nav-link main-link" id="doc-link" (click)="goToLicna()">Lična</a>
+      <a class="nav-link main-link" id="doc-link" (click)="goToVozacka()">Vozačka</a>
+      <a class="nav-link main-link" id="doc-link" (click)="goToSaobracajna()">Saobraćajna</a>
+      <a class="nav-link main-link" id="doc-link" (click)="goToOruzje()">Oružje</a>
+      <a class="nav-link main-link" id="doc-link" (click)="goToOstalo()" *ngIf="!isEmployer">Ostalo</a>
+    </div>
+
+    <div class="position-relative">
+      <a class="nav-link" style="cursor: pointer;" (click)="toggleProfileMenu()">
+        <div class="profile-container">
+          <img [src]="imagePath2" alt="Profile Icon" class="profile-icon">
+        </div>
+      </a>
+
+      <div *ngIf="showProfileMenu" class="profile-menu shadow-lg rounded position-absolute end-0 mt-2 bg-white">
+        <a class="nav-link profile-menu-item" (click)="goToProfile()">Profile</a>
+        <a class="nav-link profile-menu-item" (click)="logout()">Logout</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main class="page-content">
+  <router-outlet></router-outlet>
+</main>
+
+<footer *ngIf="isLoggedIn" class="global-footer">
+  <div class="footer-content">
+    <div class="footer-text">
+      <span class="footer-title">eUprava MUP</span>
+      <span class="footer-subtitle">&copy; {{ currentYear }} Sva prava zadržana</span>
+    </div>
+  </div>
+</footer>

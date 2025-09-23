@@ -1,0 +1,98 @@
+<div class="container mt-5">
+
+  <app-custom-alert
+    *ngIf="showAlert"
+    [message]="alertMessage"
+    [type]="alertType"
+    (closed)="closeAlert()">
+  </app-custom-alert>
+
+  <div class="d-flex flex-column flex-md-row justify-content-center mb-4 gap-2" *ngIf="!isEmployer">
+    <button class="btn btn-primary mb-2 mb-md-0" (click)="openVozackaModal()">
+      Zahtev za vađenje vozačke dozvole
+    </button>
+
+    <button class="btn btn-warning" (click)="produziVozacku()" *ngIf="mozeProduziti">
+      Produži vozačku dozvolu
+    </button>
+  </div>
+
+  <h3 class="mb-3 text-center">
+    {{ isEmployer ? 'Zahtevi za vozačke' : 'Moje vozačka dozvola' }}
+  </h3>
+  <div class="table-responsive">
+    <table class="table table-striped table-bordered">
+      <thead class="table-dark">
+      <tr>
+        <th>#</th>
+        <th>Ime</th>
+        <th>Prezime</th>
+        <th>Datum rođenja</th>
+        <th>Datum izdavanja</th>
+        <th>Važi do</th>
+        <th>Grad</th>
+        <th>Broj dozvole</th>
+        <th>Kategorije</th>
+        <th *ngIf="isEmployer">Status</th>
+        <th *ngIf="isEmployer">Akcija</th>
+      </tr>
+      </thead>
+      <tbody>
+      <ng-container *ngFor="let vozacka of vozacke; let i = index">
+        <tr *ngIf="isEmployer || vozacka.status === 'DOZVOLJEN'">
+          <td>{{ i + 1 }}</td>
+          <td>{{ vozacka.ime }}</td>
+          <td>{{ vozacka.prezime }}</td>
+          <td>{{ vozacka.datumRodjenja | date:'dd.MM.yyyy' }}</td>
+          <td>{{ vozacka.datumIzdavanja | date:'dd.MM.yyyy' }}</td>
+          <td>{{ vozacka.datumVazenja | date:'dd.MM.yyyy' }}</td>
+          <td>{{ vozacka.grad }}</td>
+          <td>{{ vozacka.brojDozvole }}</td>
+          <td>{{ vozacka.kategorije.join(', ') }}</td>
+          <td *ngIf="isEmployer" >{{ vozacka.status }}</td>
+          <td *ngIf="isEmployer">
+            <ng-container *ngIf="vozacka.status !== 'DOZVOLJEN' && vozacka.status !== 'ODBIJEN' && vozacka.status !== 'IZGUBLJEN'">
+              <button class="btn btn-success btn-sm me-2" (click)="prihvatiZahtev(vozacka.id)">Prihvati</button>
+              <button class="btn btn-danger btn-sm" (click)="odbijZahtev(vozacka.id)">Odbij</button>
+            </ng-container>
+          </td>
+        </tr>
+      </ng-container>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="modal fade" id="vozackaModal" #vozackaModal tabindex="-1" aria-labelledby="vozackaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="vozackaModalLabel">Podnesi zahtev za vozačku dozvolu</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form #vozackaForm="ngForm" (ngSubmit)="podnesiZahtev(vozackaForm)">
+
+            <div class="mb-3">
+              <label for="kategorije" class="form-label">Kategorije</label>
+              <input type="text" class="form-control" id="kategorije" name="kategorije"
+                     [(ngModel)]="noviZahtev.kategorijeStr"
+                     required #katModel="ngModel"
+                     placeholder="Unesite kategorije odvojene zarezom, npr. A,B">
+              <div class="text-danger" *ngIf="katModel.invalid && katModel.touched">
+                Morate uneti bar jednu kategoriju.
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zatvori</button>
+              <button type="submit" class="btn btn-primary" [disabled]="vozackaForm.invalid">Podnesi zahtev</button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</div>
