@@ -44,10 +44,14 @@
         <div class="actions">
           <button mat-raised-button
                   color="primary" type="submit"
-                  [disabled]="registerForm.invalid"
-                  (click)="onSubmit()">
+                  [disabled]="registerForm.invalid">
             Registruj se
           </button>
+
+          <span>
+            Već ste registrovani?
+            <a [routerLink]="['/login']">Ulogujte se ovde</a>
+          </span>
         </div>
       </form>
     </mat-card-content>

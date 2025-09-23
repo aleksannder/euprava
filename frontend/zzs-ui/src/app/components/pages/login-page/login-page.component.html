@@ -13,24 +13,18 @@
           <mat-label>E-mail adresa</mat-label>
           <input matInput formControlName="email" placeholder="Unesite vašu e-mail adresu">
           <mat-icon matSuffix>email</mat-icon>
-          <mat-error *ngIf="loginForm.get('email')?.hasError('required')">E-mail adresa je obavezna</mat-error>
-          <mat-error *ngIf="loginForm.get('email')?.hasError('email')">Neispravna e-mail adresa</mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Lozinka</mat-label>
-          <input matInput [type]="hide ? 'password' : 'text'" formControlName="password" placeholder="Unesite lozinku">
-          <button mat-icon-button matSuffix type="button" (click)="hide = !hide">
-            <mat-icon>{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
-          </button>
-          <mat-error *ngIf="loginForm.get('password')?.hasError('required')">Lozinka je obavezna</mat-error>
-          <mat-error *ngIf="loginForm.get('password')?.hasError('minlength')">Lozinka mora imati minimalno 8 karaktera</mat-error>
         </mat-form-field>
 
         <div class="actions">
-          <button mat-raised-button color="primary" type="submit" [disabled]="loginForm.invalid">
-            Uloguj se
+          <button mat-flat-button color="secondary" type="submit"  class="actionBtn" (click)="onSubmit()">
+            Ulogujte se
           </button>
+
+
+          <span>
+            Nemate nalog?
+            <a [routerLink]="['/register']">Registrujte se ovde</a>
+          </span>
         </div>
       </form>
     </mat-card-content>

@@ -1,17 +1,46 @@
+import {Auth0Client, createAuth0Client} from '@auth0/auth0-spa-js';
 import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {RegisterUserRequest, RegisterUserResponse} from '../../model/register-user.model';
-import {Observable} from 'rxjs';
 
-
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class AuthService {
-    private controllerUrl: string = 'http://localhost:8080/api/auth';
+  private client?: Auth0Client;
 
-    constructor(private httpClient: HttpClient) {}
+  async init(domain: string, clientId: string, audience: string): Promise<void> {
+    this.client = await createAuth0Client({
+      domain,
+      clientId,
+      authorizationParams: {
+        redirect_uri: window.location.origin,
+        audience,
+        scope: 'openid profile email'
+      },
+      cacheLocation: 'localstorage',
+      useRefreshTokens: true
+    });
 
-
-    registerUser(registerUserRequest: RegisterUserRequest): Observable<RegisterUserResponse> {
-      return this.httpClient.post<RegisterUserResponse>(`${this.controllerUrl}/register`, registerUserRequest);
+    if (window.location.search.includes('code=')) {
+      await this.client.handleRedirectCallback();
+      window.history.replaceState({}, document.title, window.location.pathname);
     }
+
+  }
+  async login(): Promise<void> {
+    await this.client!.loginWithRedirect();
+  }
+
+  async logout(): Promise<void> {
+    await this.client!.logout({ logoutParams: { returnTo: window.location.origin } });
+  }
+
+  async getAccessToken(): Promise<string | undefined> {
+    return this.client!.getTokenSilently().catch(() => undefined);
+  }
+
+  async isAuthenticated(): Promise<boolean> {
+    return this.client!.isAuthenticated();
+  }
+
+  async getUser() {
+    return this.client!.getUser();
+  }
 }

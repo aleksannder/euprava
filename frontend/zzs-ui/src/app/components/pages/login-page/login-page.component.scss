@@ -33,5 +33,10 @@ mat-card-header {
 .actions {
   margin-top: 1.5rem;
   display: flex;
+  flex-direction: column;
   justify-content: center;
+}
+
+.actionBtn {
+  margin-top: 1rem;
 }

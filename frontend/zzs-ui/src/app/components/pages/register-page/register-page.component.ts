@@ -6,9 +6,10 @@ import {MatError, MatFormField, MatLabel} from '@angular/material/form-field';
 import {MatIcon} from '@angular/material/icon';
 import {MatInput} from '@angular/material/input';
 import {NgIf} from '@angular/common';
-import {KeycloakService} from '../../../services/auth/keycloak.service';
-import {AuthService} from '../../../services/auth/auth.service';
-import {RegisterUserRequest, Role} from '../../../model/register-user.model';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {UsersService} from '../../../services/users/users.service';
+import {AuthService} from '@auth0/auth0-angular';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-register-page',
@@ -27,18 +28,20 @@ import {RegisterUserRequest, Role} from '../../../model/register-user.model';
     MatInput,
     MatLabel,
     NgIf,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    RouterLink
   ],
   templateUrl: './register-page.component.html',
   styleUrl: './register-page.component.scss',
-  providers: [AuthService]
+  providers: [UsersService, AuthService]
 })
 export class RegisterPageComponent {
   registerForm: FormGroup;
   hide = true;
-
   constructor(private fb: FormBuilder,
-              private authService: AuthService
+              private usersService: UsersService,
+              private snackbar: MatSnackBar,
+              private auth0: AuthService,
   ) {
     this.registerForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -49,13 +52,15 @@ export class RegisterPageComponent {
   }
 
   onSubmit() {
-    if (this.registerForm.valid) {
-      const registerUserRequest: RegisterUserRequest = this.registerForm.value as RegisterUserRequest;
-      registerUserRequest.role = Role.CITIZEN;
-      this.authService.registerUser(registerUserRequest).subscribe({
-        next: (res) => console.log('registered: ', res),
-        error: (err) => console.error(err),
-      })
+    if (!this.registerForm.valid) {
+      return;
     }
+    this.usersService.register(this.registerForm.value).subscribe({
+      next: () => {
+        this.snackbar.open("Registracija uspesna. Molimo vas da se ulogujete.", undefined, {duration: 3000});
+        this.auth0.loginWithRedirect();
+      },
+      error: () => this.snackbar.open("Doslo je do greske", undefined, { duration: 3000 })
+    })
   }
 }

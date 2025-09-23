@@ -25,9 +25,6 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(name = "password", nullable = false)
-    private String password;
-
     private String firstName;
 
     private String lastName;
@@ -40,4 +37,7 @@ public class User {
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private Set<Role> roles;
+
+    @Column(name="auth0_user_id", nullable = true)
+    private String auth0UserId;
 }

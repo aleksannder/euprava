@@ -4,55 +4,55 @@ import com.github.aleksannder.zavodzastatistiku.dto.auth.UserRegisterRequestDto;
 import com.github.aleksannder.zavodzastatistiku.model.User;
 import com.github.aleksannder.zavodzastatistiku.model.enums.Role;
 import com.github.aleksannder.zavodzastatistiku.repository.UserRepository;
-import jakarta.transaction.Transactional;
-import jakarta.validation.ValidationException;
+import com.github.aleksannder.zavodzastatistiku.service.sso.Auth0ManagementClient;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.util.Optional;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
-
+    private final Auth0ManagementClient auth0ManagementClient;
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
+    @Value("${auth0.m2m.db.connection}")
+    private String connection;
 
-    @Transactional
-    public User registerUser(UserRegisterRequestDto userRegisterRequestDto) throws ValidationException {
-        if (userRepository.existsByEmail(userRegisterRequestDto.email().toLowerCase())) {
-            throw new ValidationException("Email already exists");
+    @Value("${auth0.m2m.roles.citizen}")
+    private String roleCitizen;
+
+    public String registerAndLinkToAuth0(UserRegisterRequestDto registerRequest) {
+        if (userRepository.existsByEmail(registerRequest.email().toLowerCase())) {
+            throw new IllegalArgumentException("email already exists");
         }
+
+        Map<String, Object> auth0User = auth0ManagementClient
+                .createDbUser(registerRequest.email(), registerRequest.password(), registerRequest.firstName(), registerRequest.lastName(), connection)
+                .block();
+        String auth0UserId = (String) Objects.requireNonNull(auth0User).get("user_id");
 
         User u = User.builder()
-                        .firstName(userRegisterRequestDto.firstName())
-                                .lastName(userRegisterRequestDto.lastName())
-                                        .email(userRegisterRequestDto.email())
-                                                .password(passwordEncoder.encode(userRegisterRequestDto.password()))
-                                                        .createdAt(Instant.now()).build();
+                .email(registerRequest.email().toLowerCase())
+                .firstName(registerRequest.firstName())
+                .lastName(registerRequest.lastName())
+                .auth0UserId(auth0UserId)
+                .roles(Set.of(Role.valueOf(roleCitizen)))
+                .build();
 
+        userRepository.save(u);
 
-        switch (userRegisterRequestDto.role()) {
-            case ADMIN:
-                throw new ValidationException("Admin can't register!");
-            case ANALYST:
-                throw new ValidationException("Analyst can't register!");
-            case CITIZEN:
-                u.setRoles(Set.of(Role.ANALYST));
-                break;
-            default:
-                throw new ValidationException("Invalid role");
-        }
+        auth0ManagementClient.assignRoleToUser(auth0UserId, roleCitizen).block();
 
-        return userRepository.save(u);
+        auth0ManagementClient.updateUserMetadata(auth0UserId, Map.of(
+                "service", "zzs",
+                "profileId", u.getId().toString()
+        )).block();
 
+        return auth0UserId;
     }
 }
