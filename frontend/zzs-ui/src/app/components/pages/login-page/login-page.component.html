@@ -1,0 +1,32 @@
+<div class="login-container">
+  <mat-card class="login-card mat-elevation-z6">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon aria-hidden="false">lock</mat-icon>
+        &nbsp; Ulogujte se
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>E-mail adresa</mat-label>
+          <input matInput formControlName="email" placeholder="Unesite vašu e-mail adresu">
+          <mat-icon matSuffix>email</mat-icon>
+        </mat-form-field>
+
+        <div class="actions">
+          <button mat-flat-button color="secondary" type="submit"  class="actionBtn" (click)="onSubmit()">
+            Ulogujte se
+          </button>
+
+
+          <span>
+            Nemate nalog?
+            <a [routerLink]="['/register']">Registrujte se ovde</a>
+          </span>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

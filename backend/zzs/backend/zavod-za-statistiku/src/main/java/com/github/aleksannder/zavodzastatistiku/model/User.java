@@ -3,6 +3,7 @@ package com.github.aleksannder.zavodzastatistiku.model;
 import com.github.aleksannder.zavodzastatistiku.model.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
@@ -13,7 +14,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @Table(name = "users")
 public class User {
 
@@ -24,14 +25,9 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(name = "password", nullable = false)
-    private String password;
-
     private String firstName;
 
     private String lastName;
-
-    private Boolean enabled = true;
 
     @CreationTimestamp
     private Instant createdAt;
@@ -41,4 +37,7 @@ public class User {
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private Set<Role> roles;
+
+    @Column(name="auth0_user_id", nullable = true)
+    private String auth0UserId;
 }

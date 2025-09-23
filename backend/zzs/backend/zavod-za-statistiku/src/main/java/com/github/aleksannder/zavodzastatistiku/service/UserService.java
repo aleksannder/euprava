@@ -4,89 +4,55 @@ import com.github.aleksannder.zavodzastatistiku.dto.auth.UserRegisterRequestDto;
 import com.github.aleksannder.zavodzastatistiku.model.User;
 import com.github.aleksannder.zavodzastatistiku.model.enums.Role;
 import com.github.aleksannder.zavodzastatistiku.repository.UserRepository;
-import jakarta.transaction.Transactional;
-import jakarta.validation.ValidationException;
+import com.github.aleksannder.zavodzastatistiku.service.sso.Auth0ManagementClient;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.util.Optional;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+
 
 @Service
 @RequiredArgsConstructor
-public class UserService implements UserDetailsService {
+public class UserService {
+    private final Auth0ManagementClient auth0ManagementClient;
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
+    @Value("${auth0.m2m.db.connection}")
+    private String connection;
 
+    @Value("${auth0.m2m.roles.citizen}")
+    private String roleCitizen;
 
-    @Transactional
-    public User registerUser(UserRegisterRequestDto userRegisterRequestDto) throws ValidationException {
-        if (userRepository.existsByEmail(userRegisterRequestDto.getEmail())) {
-            throw new ValidationException("Email already exists");
+    public String registerAndLinkToAuth0(UserRegisterRequestDto registerRequest) {
+        if (userRepository.existsByEmail(registerRequest.email().toLowerCase())) {
+            throw new IllegalArgumentException("email already exists");
         }
 
-        boolean enabled;
-        Set<Role> roles;
-
-        switch (userRegisterRequestDto.getRole()) {
-            case ANALYST -> {
-                enabled = false;
-                roles = Set.of(Role.ANALYST);
-            }
-            case CITIZEN -> {
-                enabled = true;
-                roles = Set.of(Role.CITIZEN);
-            }
-            case ADMIN -> {
-                throw new ValidationException("Admin role cannot be registered!");
-            }
-            default -> throw new ValidationException("Invalid role");
-        }
+        Map<String, Object> auth0User = auth0ManagementClient
+                .createDbUser(registerRequest.email(), registerRequest.password(), registerRequest.firstName(), registerRequest.lastName(), connection)
+                .block();
+        String auth0UserId = (String) Objects.requireNonNull(auth0User).get("user_id");
 
         User u = User.builder()
-                .email(userRegisterRequestDto.getEmail())
-                .firstName(userRegisterRequestDto.getFirstName())
-                .lastName(userRegisterRequestDto.getLastName())
-                .password(passwordEncoder.encode(userRegisterRequestDto.getPassword()))
-                .enabled(enabled)
-                .roles(roles)
+                .email(registerRequest.email().toLowerCase())
+                .firstName(registerRequest.firstName())
+                .lastName(registerRequest.lastName())
+                .auth0UserId(auth0UserId)
+                .roles(Set.of(Role.valueOf(roleCitizen)))
                 .build();
 
-        return userRepository.save(u);
-    }
+        userRepository.save(u);
 
-    public User findByEmail(String email) {
-        Optional<User> u = userRepository.findByEmail(email);
-        return u.orElse(null);
-    }
+        auth0ManagementClient.assignRoleToUser(auth0UserId, roleCitizen).block();
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        var u = userRepository.findByEmail(username.toLowerCase()).orElseThrow(() -> new UsernameNotFoundException(username));
+        auth0ManagementClient.updateUserMetadata(auth0UserId, Map.of(
+                "service", "zzs",
+                "profileId", u.getId().toString()
+        )).block();
 
-        var authorities = u.getRoles().stream()
-                .map(r -> new SimpleGrantedAuthority("ROLE_" + r.name()))
-                .toList();
-
-        if (!u.getEnabled()) {
-            throw new UsernameNotFoundException(username);
-        }
-
-        return org.springframework.security.core.userdetails.User
-                .withUsername(u.getEmail())
-                .password(u.getPassword())
-                .authorities(authorities)
-                .accountLocked(false)
-                .accountExpired(false)
-                .credentialsExpired(false)
-                .disabled(!u.getEnabled())
-                .build();
+        return auth0UserId;
     }
 }
