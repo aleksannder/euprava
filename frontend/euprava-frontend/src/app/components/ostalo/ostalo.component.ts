@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ZahteviService, UnifiedZahtevResponse } from '../../services/zahtevi.service';
-import {AuthService} from "../../services/auth.service";
+import {Role} from "../../models/korisnik";
+import {RoleService} from "../../services/role.service";
 
 interface UnifiedItem {
   id: string | number;
@@ -18,18 +19,31 @@ interface UnifiedItem {
 export class OstaloComponent implements OnInit {
   zahtevi: UnifiedItem[] = [];
   message = '';
-  rola: string = '';
+  rola: Role = Role.CITIZEN;
   alertMessage: string = '';
   alertType: 'success' | 'error' = 'success';
   showAlert: boolean = false;
   maticnaPodaci: any = null;
   prikaziMaticnu: boolean = false;
 
-  constructor(private zahteviService: ZahteviService,private authService: AuthService) {}
+  constructor(private zahteviService: ZahteviService, private roleService: RoleService) {}
 
   ngOnInit(): void {
     this.ucitajZahteve();
-    this.rola = this.authService.getRoleFromToken();
+    this.roleService.getRoles$().subscribe(roles => {
+      const role = roles[0];
+
+      switch (role) {
+        case 'EMPLOYER':
+          this.rola = Role.EMPLOYER;
+          break;
+        case 'CITIZEN':
+          this.rola = Role.CITIZEN;
+          break;
+        default:
+          this.rola = Role.CITIZEN;
+      }
+    });
   }
 
   selectedDokument: string = '';
@@ -132,7 +146,7 @@ export class OstaloComponent implements OnInit {
   }
 
   get isEmployer(): boolean {
-    return this.rola === 'EMPLOYER';
+    return this.rola === Role.EMPLOYER;
   }
 
   closeAlert(): void {

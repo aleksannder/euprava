@@ -1,7 +1,8 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { VozackaDozvola, VozackaService } from '../../services/vozacka.service';
 import { NgForm } from '@angular/forms';
-import { AuthService } from '../../services/auth.service';
+import {Role} from "../../models/korisnik";
+import {RoleService} from "../../services/role.service";
 
 declare var bootstrap: any;
 
@@ -16,7 +17,7 @@ export class VozackaComponent implements OnInit, AfterViewInit {
 
   vozacke: VozackaDozvola[] = [];
   token: string = '';
-  rola: string = '';
+  rola: Role = Role.CITIZEN;
 
   noviZahtev = { grad: '', kategorijeStr: '' };
   modalInstance: any;
@@ -25,11 +26,24 @@ export class VozackaComponent implements OnInit, AfterViewInit {
   alertMessage: string = '';
   alertType: 'success' | 'error' = 'success';
 
-  constructor(private vozackaService: VozackaService, private authService: AuthService) { }
+  constructor(private vozackaService: VozackaService, private roleService: RoleService) { }
 
   ngOnInit(): void {
-    this.token = localStorage.getItem('jwtToken') || '';
-    this.rola = this.authService.getRoleFromToken();
+    this.roleService.getRoles$().subscribe(roles => {
+      const role = roles[0];
+
+      switch (role) {
+        case 'CITIZEN':
+          this.rola = Role.CITIZEN;
+          break;
+        case 'EMPLOYER':
+          this.rola = Role.EMPLOYER;
+          break;
+        default:
+          this.rola = Role.CITIZEN;
+      }
+    });
+
     this.ucitajVozacke();
   }
 
@@ -87,7 +101,7 @@ export class VozackaComponent implements OnInit, AfterViewInit {
   }
 
   get isEmployer(): boolean {
-    return this.rola === 'EMPLOYER';
+    return this.rola === Role.EMPLOYER;
   }
 
   prihvatiZahtev(id: number) {

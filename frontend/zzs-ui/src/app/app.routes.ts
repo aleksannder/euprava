@@ -13,15 +13,15 @@ import {NotFoundPageComponent} from './components/pages/not-found-page/not-found
 export const routes: Routes = [
     // Login
   {
-    path: 'login', canActivate: [authorizationGuard], component: LoginPageComponent
+    path: 'login', canActivate: [], component: LoginPageComponent
   },
     // Register
   {
-    path: 'register', canActivate: [authorizationGuard], component: RegisterPageComponent
+    path: 'register', canActivate: [], component: RegisterPageComponent
   },
     // Citizen routes
   {
-    path: 'dashboard', canActivate: [roleGuard([Role.CITIZEN, Role.ADMIN, Role.ANALYST])], component: DashboardPageComponent
+    path: 'dashboard', canActivate: [], component: DashboardPageComponent
   },
 
 

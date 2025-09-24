@@ -54,7 +54,7 @@ public class Auth0ManagementClient {
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(Map.of(
-                                "connection", connection, // e.g. "Username-Password-Authentication"
+                                "connection", connection,
                                 "email", email.toLowerCase(),
                                 "password", password,
                                 "email_verified", false,
@@ -63,7 +63,8 @@ public class Auth0ManagementClient {
                         ))
                         .exchangeToMono(resp -> {
                             if (resp.statusCode().is2xxSuccessful()) {
-                                return resp.bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {});
+                                return resp.bodyToMono(new ParameterizedTypeReference<>() {
+                                });
                             }
                             return resp.bodyToMono(String.class).flatMap(b ->
                                     Mono.error(new RuntimeException("failed to create db user [" + resp.statusCode().value() + "]: " + b)));
@@ -77,7 +78,8 @@ public class Auth0ManagementClient {
                         .uri("https://" + domain + "/api/v2/users/{id}", userId)
                         .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                         .retrieve()
-                        .bodyToMono(new ParameterizedTypeReference<Map<String,Object>>() {})
+                        .bodyToMono(new ParameterizedTypeReference<>() {
+                        })
         );
     }
 
@@ -95,7 +97,6 @@ public class Auth0ManagementClient {
     }
 
     public Mono<String> getRoleIdByName(String roleName) {
-        // cache to avoid repeated list calls
         String cached = roleIdCache.get(roleName);
         if (cached != null) return Mono.just(cached);
 

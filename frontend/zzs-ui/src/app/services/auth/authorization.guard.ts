@@ -9,8 +9,8 @@ export const authorizationGuard: CanActivateFn = (route, state) => {
 
   return auth.isAuthenticated$.pipe(
     map(isAuth => {
-      if (isAuth) {
-        router.navigate(['/dashboard']);
+      if (!isAuth) {
+        router.navigate(['/login']);
         return false;
       }
       return true;

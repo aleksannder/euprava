@@ -63,7 +63,7 @@ public class SecurityConfig {
 
             for (String p : perms) {
                 switch (p) {
-                    case "zzs:citizen"  -> auths.add(new SimpleGrantedAuthority("ROLE_CITIZEN"));
+                    case "citizen:access"  -> auths.add(new SimpleGrantedAuthority("ROLE_CITIZEN"));
                     case "zzs:analyst" -> auths.add(new SimpleGrantedAuthority("ROLE_EMPLOYEE"));
                     case "zzs:admin" -> auths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
                 }

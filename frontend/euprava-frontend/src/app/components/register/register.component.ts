@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService, Korisnik } from "../../services/auth.service";
+import {Korisnik} from "../../models/korisnik";
 
 @Component({
   selector: 'app-register',
@@ -28,7 +28,6 @@ export class RegisterComponent {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private authService: AuthService
   ) {
     const danas = new Date();
     danas.setDate(danas.getDate() - 1);
@@ -128,11 +127,12 @@ export class RegisterComponent {
     }
 
     if (this.registerForm.valid) {
+      // todo: handle register
       const korisnikData: Korisnik = this.registerForm.value;
-      this.authService.register(korisnikData).subscribe({
-        next: () => this.showAlert('Registracija uspešna!', 'success'),
-        error: (error) => this.showAlert(error.error || 'Došlo je do greške pri registraciji.', 'error')
-      });
+      // this.authService.register(korisnikData).subscribe({
+      //   next: () => this.showAlert('Registracija uspešna!', 'success'),
+      //   error: (error) => this.showAlert(error.error || 'Došlo je do greške pri registraciji.', 'error')
+      // });
     }
   }
 

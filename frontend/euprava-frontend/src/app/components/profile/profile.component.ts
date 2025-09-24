@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {AuthService, Korisnik} from "../../services/auth.service";
+import {Korisnik} from "../../models/korisnik";
 
 @Component({
   selector: 'app-profile',
@@ -10,13 +10,15 @@ export class ProfileComponent implements OnInit {
   public imagePath = 'assets/user.png';
   public user: Korisnik | null = null;
 
-  constructor(private authService: AuthService) { }
+  constructor() { }
 
   ngOnInit(): void {
-    this.authService.getCurrentUser().subscribe({
-      next: (data) => this.user = data,
-      error: (err) => console.error(err)
-    });
+    //todo rework get user
+
+    // this.authService.getCurrentUser().subscribe({
+    //   next: (data) => this.user = data,
+    //   error: (err) => console.error(err)
+    // });
   }
 
 }

@@ -12,7 +12,7 @@ const AUTH0_DOMAIN: string = 'dev-7wsgpcp2kp2ul4ct.us.auth0.com';
 const AUTH0_CLIENT_ID: string = 'pHoKHd84VSWN5sa8F5ymTjIMcss7NneH';
 
 // ZZS-API
-const AUTH0_IDENTIFIER: string = 'https://api.zzs';
+const AUTH0_IDENTIFIER: string = 'https://api.shared';
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
