@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -43,15 +44,17 @@ public class SecurityConfig {
                 .cors(cors -> {})
                 .sessionManagement(sm -> sm.sessionCreationPolicy(STATELESS))
                 .authorizeHttpRequests(reg -> reg
-                        .requestMatchers("/api/public/**", "/api/auth/**").permitAll()
-                        .requestMatchers("/api/citizen/**").hasAnyRole("CITIZEN", "ANALYST", "ADMIN")
-                        .requestMatchers("/api/analyst/**").hasAnyRole("ANALYST", "ADMIN")
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated()
+//                        .requestMatchers("/api/public/**", "/api/auth/**").permitAll()
+//                        .requestMatchers("/api/citizen/**").hasAnyRole("CITIZEN", "ANALYST", "ADMIN")
+//                        .requestMatchers("/api/analyst/**").hasAnyRole("ANALYST", "ADMIN")
+//                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+//                        .anyRequest().authenticated()
+                                .anyRequest().permitAll()
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(
-                        jwt -> jwt.jwtAuthenticationConverter(permissionsToAuthorities()))
-                );
+                .oauth2ResourceServer(AbstractHttpConfigurer::disable);
+//                .oauth2ResourceServer(oauth2 -> oauth2.jwt(
+//                        jwt -> jwt.jwtAuthenticationConverter(permissionsToAuthorities()))
+//                );
         return http.build();
     }
 
@@ -63,7 +66,7 @@ public class SecurityConfig {
 
             for (String p : perms) {
                 switch (p) {
-                    case "zzs:citizen"  -> auths.add(new SimpleGrantedAuthority("ROLE_CITIZEN"));
+                    case "citizen:access"  -> auths.add(new SimpleGrantedAuthority("ROLE_CITIZEN"));
                     case "zzs:analyst" -> auths.add(new SimpleGrantedAuthority("ROLE_EMPLOYEE"));
                     case "zzs:admin" -> auths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
                 }

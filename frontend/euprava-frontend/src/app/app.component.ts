@@ -1,6 +1,7 @@
 import { Component, HostListener } from '@angular/core';
-import { AuthService } from './services/auth.service';
 import { Router } from '@angular/router';
+import {AuthService} from "@auth0/auth0-angular";
+import {RoleService} from "./services/role.service";
 
 @Component({
   selector: 'app-root',
@@ -14,10 +15,10 @@ export class AppComponent {
   public imagePath2 = 'assets/accoun.png';
   public showProfileMenu: boolean = false;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService, private router: Router, private roleService: RoleService) {}
 
-  get isLoggedIn(): boolean {
-    return !!localStorage.getItem('jwtToken');
+  get isLoggedIn$() {
+    return this.authService.isAuthenticated$;
   }
 
   toggleProfileMenu() {
@@ -75,7 +76,7 @@ export class AppComponent {
   }
 
   get isEmployer(): boolean {
-    return this.authService.getRoleFromToken() === 'EMPLOYER';
+    return this.roleService.hasRole('EMPLOYER');
   }
 
 }

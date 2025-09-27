@@ -1,5 +1,6 @@
 package com.github.aleksannder.zavodzastatistiku.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,6 +19,7 @@ public class Subdomain {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "domain_id")
+    @JsonBackReference
     private Domain domain;
 
     @Column(nullable = false, length = 64)

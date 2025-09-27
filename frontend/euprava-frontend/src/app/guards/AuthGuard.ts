@@ -1,20 +1,38 @@
-import { Injectable } from '@angular/core';
-import { CanActivate, Router, UrlTree } from '@angular/router';
+import {CanActivateFn, Router} from "@angular/router";
+import {inject} from "@angular/core";
+import {AuthService} from "@auth0/auth0-angular";
+import {map} from "rxjs";
 
-@Injectable({
-  providedIn: 'root'
-})
-export class AuthGuard implements CanActivate {
 
-  constructor(private router: Router) {}
+export const authGuard: CanActivateFn = (route, state) => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
 
-  canActivate(): boolean | UrlTree {
-    const token = localStorage.getItem('jwtToken');
-
-    if (token) {
+  return auth.isAuthenticated$.pipe(
+    map(isAuthenticated => {
+      if (!isAuthenticated) {
+        router.navigate(['/login'])
+        return false;
+      }
       return true;
-    } else {
-      return this.router.parseUrl('/login');
-    }
-  }
+    })
+  );
+};
+
+export function roleGuard(allowedRoles: string[]): CanActivateFn {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  return (route, state) => {
+    return auth.user$.pipe(
+      map(user => {
+        const roles: string[] = user?.['https://egov.local/roles'] || [];
+        const hasRole = roles.some(r => allowedRoles.includes(r));
+
+        if (hasRole) return true;
+
+        router.navigate(['/custom-alert']);
+        return false;
+      })
+    );
+  };
 }

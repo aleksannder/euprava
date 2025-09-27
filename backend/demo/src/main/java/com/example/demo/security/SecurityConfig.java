@@ -2,38 +2,85 @@ package com.example.demo.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
+
 @Configuration
+@EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
+    private static final String CITIZEN_CLAIM = "https://egov.local/claims/citizen";
+
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
-
+                .cors(cors -> {})
+                .sessionManagement(sm -> sm.sessionCreationPolicy(STATELESS))
+                .authorizeHttpRequests(reg -> reg
+                        .requestMatchers("/api/public/**", "/api/auth/**").permitAll()
+                        .requestMatchers("/api/citizen/**").hasAnyRole("CITIZEN", "EMPLOYEE")
+                        .requestMatchers("/api/employee/**").hasAnyRole("EMPLOYEE")
+                        .anyRequest().authenticated()
+                )
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(
+                        jwt -> jwt.jwtAuthenticationConverter(permissionsToAuthorities()))
+                );
         return http.build();
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true);
+    Converter<Jwt, ? extends AbstractAuthenticationToken> permissionsToAuthorities() {
+        return jwt -> {
+            var auths = new ArrayList<GrantedAuthority>();
+            var perms = (Collection<String>) jwt.getClaims().getOrDefault("permissions", List.of());
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
+            for (String p : perms) {
+                switch (p) {
+                    case "citizen:access"  -> auths.add(new SimpleGrantedAuthority("ROLE_CITIZEN"));
+                    case "mup:employee" -> auths.add(new SimpleGrantedAuthority("ROLE_EMPLOYER"));
+                }
+            }
+            return new JwtAuthenticationToken(jwt, auths, jwt.getSubject());
+        };
     }
 
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        var cors = new CorsConfiguration();
+        cors.setAllowCredentials(true);
+        cors.setAllowedOrigins(List.of("http://localhost:4200", "http://localhost:4300"));
+        cors.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
+        cors.setAllowedHeaders(List.of("*"));
+
+        var source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", cors);
+        return source;
+    }
 }

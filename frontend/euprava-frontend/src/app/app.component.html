@@ -1,4 +1,4 @@
-<nav *ngIf="isLoggedIn" class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+<nav *ngIf="isLoggedIn$ | async" class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
   <div class="container-fluid d-flex justify-content-between align-items-center">
     <div class="d-flex align-items-center">
       <a class="navbar-brand d-flex align-items-center me-4" style="cursor: pointer;" (click)="goToDashboard()">
@@ -32,7 +32,7 @@
   <router-outlet></router-outlet>
 </main>
 
-<footer *ngIf="isLoggedIn" class="global-footer">
+<footer *ngIf="isLoggedIn$ | async" class="global-footer">
   <div class="footer-content">
     <div class="footer-text">
       <span class="footer-title">eUprava MUP</span>

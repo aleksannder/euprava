@@ -1,8 +1,8 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { LicnaKarta } from "../../models/LicnaKarta";
 import { ZahteviService } from "../../services/zahtevi.service";
-import { NgForm } from '@angular/forms';
-import { AuthService } from '../../services/auth.service';
+import {Role} from "../../models/korisnik";
+import {RoleService} from "../../services/role.service";
 
 declare var bootstrap: any;
 
@@ -16,7 +16,7 @@ export class LicnaComponent implements OnInit, AfterViewInit {
 
   zahtevi: LicnaKarta[] = [];
   token: string = '';
-  rola: string = '';
+  rola: Role = Role.EMPLOYER;
 
   noviZahtev = {
     jmbg: '',
@@ -32,11 +32,26 @@ export class LicnaComponent implements OnInit, AfterViewInit {
   alertMessage: string = '';
   alertType: 'success' | 'error' = 'error';
 
-  constructor(private zahteviService: ZahteviService, private authService: AuthService) { }
+  constructor(private zahteviService: ZahteviService, private roleService: RoleService) { }
 
   ngOnInit(): void {
     this.token = localStorage.getItem('jwtToken') || '';
-    this.rola = this.authService.getRoleFromToken();
+    //todo
+    this.roleService.getRoles$().subscribe(roles => {
+      const role = roles[0];
+
+      switch (role) {
+        case 'EMPLOYER':
+          this.rola = Role.EMPLOYER;
+          break;
+        case 'CITIZEN':
+          this.rola = Role.CITIZEN;
+          break;
+        default:
+          this.rola = Role.CITIZEN;
+      }
+    });
+
     this.ucitajZahteve();
 
     const danas = new Date();
@@ -90,7 +105,7 @@ export class LicnaComponent implements OnInit, AfterViewInit {
   }
 
   get isEmployer(): boolean {
-    return this.rola === 'EMPLOYER';
+    return this.rola === Role.EMPLOYER;
   }
 
   prihvatiZahtev(id: number) {

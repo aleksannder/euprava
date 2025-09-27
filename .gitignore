@@ -12,7 +12,10 @@ target/
 .settings
 .springBeans
 .sts4-cache
-
+frontend/zzs-ui/node_modules
+frontend/zzs-ui/.angular
+frontend/euprava-frontend/node_modules
+frontend/euprava-frontend/.angular
 ### IntelliJ IDEA ###
 .idea
 *.iws

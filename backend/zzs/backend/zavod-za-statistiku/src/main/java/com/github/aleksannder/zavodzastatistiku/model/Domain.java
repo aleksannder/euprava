@@ -1,7 +1,10 @@
 package com.github.aleksannder.zavodzastatistiku.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.List;
 
 @Entity
 @AllArgsConstructor
@@ -21,4 +24,8 @@ public class Domain {
 
     @Column(nullable = false, length = 255)
     private String name;
+
+    @OneToMany(mappedBy = "domain", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<Subdomain> subdomains;
 }

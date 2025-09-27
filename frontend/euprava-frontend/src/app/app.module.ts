@@ -8,7 +8,7 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import { HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
 import { CustomAlertComponent } from './components/custom-alert/custom-alert.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
-import {AuthInterceptor} from "./interceptor/AuthInterceptor";
+import {authInterceptor} from "./interceptor/AuthInterceptor";
 import { LicnaComponent } from './components/licna/licna.component';
 import { ProfileComponent } from './components/profile/profile.component';
 import { VozackaComponent } from './components/vozacka/vozacka.component';
@@ -16,7 +16,12 @@ import { SaobracajnaComponent } from './components/saobracajna/saobracajna.compo
 import {CommonModule} from "@angular/common";
 import { OruzjeComponent } from './components/oruzje/oruzje.component';
 import { OstaloComponent } from './components/ostalo/ostalo.component';
+import {AuthModule} from "@auth0/auth0-angular";
 
+const AUTH0_DOMAIN: string = 'dev-7wsgpcp2kp2ul4ct.us.auth0.com';
+const AUTH0_CLIENT_ID: string = 'RXUhNLnPVrqyzaMtQc5OgAVOg8Gu35WI';
+
+const AUTH0_IDENTIFIER: string = 'https://api.shared';
 @NgModule({
   declarations: [
     AppComponent,
@@ -37,12 +42,23 @@ import { OstaloComponent } from './components/ostalo/ostalo.component';
     ReactiveFormsModule,
     HttpClientModule,
     FormsModule,
-    CommonModule
+    CommonModule,
+    AuthModule.forRoot({
+      domain: AUTH0_DOMAIN,
+      clientId: AUTH0_CLIENT_ID,
+      authorizationParams: {
+        redirect_uri: window.location.origin,
+        audience: AUTH0_IDENTIFIER,
+        scope: 'openid profile email'
+      },
+      cacheLocation: 'localstorage',
+      useRefreshTokens: true
+    }),
   ],
   providers: [
     {
       provide: HTTP_INTERCEPTORS,
-      useClass: AuthInterceptor,
+      useValue: authInterceptor,
       multi: true
     }
   ],
