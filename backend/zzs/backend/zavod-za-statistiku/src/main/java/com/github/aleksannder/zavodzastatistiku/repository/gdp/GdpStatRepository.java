@@ -11,10 +11,16 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface GdpStatRepository extends JpaRepository<GdpStat, Long> {
 
     List<GdpStat> findAllByOrderByYearAsc();
+
+    @Query("""
+           SELECT g FROM GdpStat g WHERE g.year = :year AND g.region = :region ORDER BY g.year DESC
+        """)
+    Optional<GdpStat> findByRegionAndYear(Region region, int year);
 
     GdpStat findTopByRegionOrderByYearDesc(Region region);
 
@@ -31,4 +37,6 @@ public interface GdpStatRepository extends JpaRepository<GdpStat, Long> {
                                           @Param("previousYear") int previousYear);
 
     Page<GdpStat> findAllByRegion(Region region, Pageable pageable);
+
+    GdpStat findTopByRegionAndYearOrderByYearDesc(Region region, int year);
 }

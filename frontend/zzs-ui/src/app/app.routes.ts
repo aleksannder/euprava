@@ -16,6 +16,8 @@ import {PopulationPageComponent} from './components/pages/population-page/popula
 import {GdpPageComponent} from './components/pages/gdp-page/gdp-page.component';
 import {WagePageComponent} from './components/pages/wage-page/wage-page.component';
 import {TrafficPageComponent} from './components/pages/traffic-page/traffic-page.component';
+import {SurveysPageComponent} from './components/pages/surveys-page/surveys-page.component';
+import {SurveyFillPageComponent} from './components/pages/survey-fill-page/survey-fill-page.component';
 
 export const routes: Routes = [
     // Login
@@ -41,7 +43,12 @@ export const routes: Routes = [
   {
     path: 'traffic', canActivate: [], component: TrafficPageComponent
   },
-
+  {
+    path: 'surveys', canActivate: [], component: SurveysPageComponent
+  },
+  {
+    path: 'surveys/:id/fill', canActivate: [], component: SurveyFillPageComponent
+  },
 
   // Unauthorized page
   {

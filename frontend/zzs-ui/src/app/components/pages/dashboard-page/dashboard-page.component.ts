@@ -9,6 +9,8 @@ import {FooterComponent} from '../../ui/footer/footer.component';
 import {NgIf} from '@angular/common';
 import {MatDialog} from '@angular/material/dialog';
 import {ImportDialogComponent} from '../../ui/dialog/import-dialog/import-dialog.component';
+import {SurveyDialogComponent} from '../../ui/dialog/survey-dialog/survey-dialog.component';
+import {SurveyService} from '../../../services/survey.service';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -33,7 +35,7 @@ import {ImportDialogComponent} from '../../ui/dialog/import-dialog/import-dialog
 export class DashboardPageComponent {
   isExpanded = true;
 
-  constructor(private dialog: MatDialog) {}
+  constructor(private dialog: MatDialog, private surveyService: SurveyService) {}
 
   toggleSidebar() {
     this.isExpanded = !this.isExpanded;
@@ -43,5 +45,9 @@ export class DashboardPageComponent {
     this.dialog.open(ImportDialogComponent, {
       width: '500px',
     })
+  }
+
+  onCreateSurvey() {
+    this.dialog.open(SurveyDialogComponent);
   }
 }

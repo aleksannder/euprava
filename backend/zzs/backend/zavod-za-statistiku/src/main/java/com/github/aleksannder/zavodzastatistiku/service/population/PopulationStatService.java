@@ -108,10 +108,16 @@ public class PopulationStatService {
                 .filter(s -> s.getYear() == year)
                 .toList();
 
-        long total = stats.stream().mapToLong(PopulationStat::getPopulation).sum();
+        Map<Region, Long> regionTotals = stats.stream()
+                .collect(Collectors.groupingBy(
+                        PopulationStat::getRegion,
+                        Collectors.summingLong(PopulationStat::getPopulation)
+                ));
 
-        return stats.stream()
-                .map(s -> new RegionValueDto(s.getRegion(), (s.getPopulation() * 100.0) / total))
+        long total = regionTotals.values().stream().mapToLong(Long::longValue).sum();
+
+        return regionTotals.entrySet().stream()
+                .map(e -> new RegionValueDto(e.getKey(), (e.getValue() * 100.0) / total))
                 .collect(Collectors.toList());
     }
 }

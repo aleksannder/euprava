@@ -1,6 +1,6 @@
 package com.github.aleksannder.zavodzastatistiku.model.survey;
 
-import com.github.aleksannder.zavodzastatistiku.model.enums.QuestionType;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,9 +20,9 @@ public class SurveyQuestion {
     private String text;
 
     @Enumerated(EnumType.STRING)
-    private QuestionType type; // TEXT, SINGLE_CHOICE, MULTIPLE_CHOICE, NUMBER
+    private QuestionType type;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "survey_id")
     private Survey survey;
 }

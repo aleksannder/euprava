@@ -1,9 +1,10 @@
 package com.github.aleksannder.zavodzastatistiku.model.survey;
 
+import com.github.aleksannder.zavodzastatistiku.model.enums.Region;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -17,13 +18,18 @@ public class SurveyResponse {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long userId; // vezano za citizen user-a (možemo kasnije povezati sa User entitetom)
+    private String userEmail;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @Enumerated(EnumType.STRING)
+    private Region region;
+
+    @ManyToOne
+    @JoinColumn(name = "survey_id")
+    private Survey survey;
+
+    @ManyToOne
     @JoinColumn(name = "question_id")
     private SurveyQuestion question;
 
-    private String answer; // slobodan tekst ili value za izbor
-
-    private LocalDateTime submittedAt = LocalDateTime.now();
+    private String answer;
 }

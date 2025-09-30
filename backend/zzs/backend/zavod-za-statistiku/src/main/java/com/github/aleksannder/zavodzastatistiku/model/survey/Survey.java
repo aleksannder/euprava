@@ -1,10 +1,12 @@
 package com.github.aleksannder.zavodzastatistiku.model.survey;
 
-import com.github.aleksannder.zavodzastatistiku.model.enums.Region;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter @Setter
@@ -16,22 +18,17 @@ public class Survey {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    Long id;
 
     private String title;
-
-    @Column(length = 2000)
-    private String description;
-
-    private LocalDateTime createdAt =  LocalDateTime.now();
-
-    private LocalDateTime expiresAt;
+    private int year = LocalDate.now().getYear();
 
     @Enumerated(EnumType.STRING)
-    private Region targetRegion;
+    private SurveyDomain domain;
+
 
     private boolean active = true;
 
-    @OneToMany(mappedBy = "survey", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SurveyQuestion> questions;
+    @OneToMany(mappedBy = "survey", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<SurveyQuestion> questions = new ArrayList<>();
 }

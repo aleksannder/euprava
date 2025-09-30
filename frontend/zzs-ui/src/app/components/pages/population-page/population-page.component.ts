@@ -121,7 +121,7 @@ export class PopulationPageComponent implements OnInit {
 
     this.populationService.getPopulationShare(2025).subscribe(data => {
       this.shareData = {
-        labels: data.map(d => RegionUtil.getLabel(d.region)),
+        labels:  [...new Set(data.map(d => RegionUtil.getLabel(d.region)))],
         datasets: [
           { data: data.map(d => d.value), backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#EF5350']}
         ]

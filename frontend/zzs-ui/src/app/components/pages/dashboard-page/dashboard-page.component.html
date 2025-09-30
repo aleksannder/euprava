@@ -22,6 +22,14 @@
         <mat-icon class="nav-icon">upload_file</mat-icon>
         <span *ngIf="isExpanded">Import</span>
       </a>
+      <a mat-list-item (click)="onCreateSurvey()">
+        <mat-icon class="nav-icon">assignment</mat-icon>
+        <span *ngIf="isExpanded">Kreiraj anketu</span>
+      </a>
+      <a mat-list-item routerLink="/surveys">
+        <mat-icon class="nav-icon">content_paste_go</mat-icon>
+        <span *ngIf="isExpanded">Ankete</span>
+      </a>
     </mat-nav-list>
   </mat-sidenav>
 
