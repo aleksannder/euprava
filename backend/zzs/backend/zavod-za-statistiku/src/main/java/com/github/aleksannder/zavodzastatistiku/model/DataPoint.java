@@ -1,10 +1,13 @@
 package com.github.aleksannder.zavodzastatistiku.model;
 
+import com.vladmihalcea.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Type;
 
 import java.time.Instant;
+import java.util.Map;
 
 @Entity
 @AllArgsConstructor
@@ -30,13 +33,13 @@ public class DataPoint {
     @JoinColumn(name = "dataset_version_id")
     private DatasetVersion datasetVersion;
 
-    @Lob
+    @Type(JsonType.class)
     @Column(columnDefinition = "jsonb", nullable = false)
-    private String dims;
+    private Map<String, Object> dims;
 
-    @Lob
+    @Type(JsonType.class)
     @Column(columnDefinition = "jsonb", nullable = false)
-    private String measures;
+    private Map<String, Object> measures;
 
     @CreationTimestamp
     private Instant createdAt;

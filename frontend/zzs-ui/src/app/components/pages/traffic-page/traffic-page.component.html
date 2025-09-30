@@ -1,0 +1,32 @@
+<div class="traffic-page">
+  <h1>Saobraćajna statistika</h1>
+
+  <div class="charts">
+    <mat-card>
+      <h2>Trend vozila i nesreća po godinama</h2>
+      <p-chart type="line" [data]="summaryData" [options]="chartOptions"></p-chart>
+    </mat-card>
+
+    <mat-card>
+      <h2>Najopasniji regioni</h2>
+      <p-chart type="bar" [data]="dangerousRegionsData" [options]="chartOptions"></p-chart>
+    </mat-card>
+
+    <mat-card>
+      <h2>Trend poginulih po regionima</h2>
+      <p-chart type="line" [data]="fatalitiesTrendData" [options]="chartOptions"></p-chart>
+    </mat-card>
+  </div>
+
+  <div class="table">
+    <app-data-table
+      [columns]="columns"
+      [data]="tableData"
+      [totalItems]="totalItems"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex"
+      (pageChange)="onPageChange($event)"
+      (sortChange)="onSortChange($event)">
+    </app-data-table>
+  </div>
+</div>

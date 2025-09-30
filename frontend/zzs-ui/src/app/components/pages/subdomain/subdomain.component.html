@@ -1,0 +1,31 @@
+<mat-card *ngIf="subdomain">
+  <h1>{{ subdomain.name }}</h1>
+  <p>{{ subdomain.code }}</p>
+</mat-card>
+
+<mat-card *ngIf="indicators.length > 0">
+  <h2>Indikatori</h2>
+  <div class="indicators">
+    <button mat-raised-button *ngFor="let ind of indicators" (click)="loadData(ind)">
+      {{ ind.name }}
+    </button>
+  </div>
+</mat-card>
+
+<mat-tab-group *ngIf="selectedIndicator">
+  <mat-tab label="Grafikon">
+    <p-chart type="line" [data]="chartData" [options]="chartOptions"></p-chart>
+  </mat-tab>
+  <mat-tab label="Tabela">
+    <table>
+      <tr>
+        <th *ngFor="let key of datapoints[0]?.dims | keyvalue">{{key.key}}</th>
+        <th *ngFor="let key of datapoints[0]?.measures | keyvalue">{{ key.key}}</th>
+      </tr>
+      <tr *ngFor="let dp of datapoints">
+        <td *ngFor="let key of (dp.dims | keyvalue)"> {{key.value}}</td>
+        <td *ngFor="let key of (dp.measures | keyvalue)">{{ key.value }}</td>
+      </tr>
+    </table>
+  </mat-tab>
+</mat-tab-group>

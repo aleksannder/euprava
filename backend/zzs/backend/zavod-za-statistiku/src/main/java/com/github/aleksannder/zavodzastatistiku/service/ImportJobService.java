@@ -66,8 +66,8 @@ public class ImportJobService {
                 DataPoint dp = DataPoint.builder()
                         .indicator(indicatorRepository.getReferenceById(indicatorId))
                         .datasetVersion(datasetVersionRepository.getReferenceById(datasetVersionId))
-                        .dims(objectMapper.writeValueAsString(dims))
-                        .measures(objectMapper.writeValueAsString(measures))
+                        .dims(dims)
+                        .measures(measures)
                         .build();
 
                 dataPointRepository.save(dp);

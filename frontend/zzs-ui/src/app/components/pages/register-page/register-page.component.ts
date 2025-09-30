@@ -5,11 +5,16 @@ import {MatCard, MatCardContent, MatCardHeader, MatCardTitle} from '@angular/mat
 import {MatError, MatFormField, MatLabel} from '@angular/material/form-field';
 import {MatIcon} from '@angular/material/icon';
 import {MatInput} from '@angular/material/input';
-import {NgIf} from '@angular/common';
+import {NgForOf, NgIf} from '@angular/common';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {UsersService} from '../../../services/users/users.service';
 import {AuthService} from '@auth0/auth0-angular';
 import {RouterLink} from '@angular/router';
+import {Region} from '../../../model/enums/region.enum';
+import {RegisterUserRequest} from '../../../model/register-user.model';
+import {MatOption} from '@angular/material/core';
+import {MatSelect} from '@angular/material/select';
+import {RegionUtil} from '../../../services/util/region.util';
 
 @Component({
   selector: 'app-register-page',
@@ -29,7 +34,10 @@ import {RouterLink} from '@angular/router';
     MatLabel,
     NgIf,
     ReactiveFormsModule,
-    RouterLink
+    RouterLink,
+    MatOption,
+    NgForOf,
+    MatSelect
   ],
   templateUrl: './register-page.component.html',
   styleUrl: './register-page.component.scss',
@@ -37,7 +45,7 @@ import {RouterLink} from '@angular/router';
 })
 export class RegisterPageComponent {
   registerForm: FormGroup;
-  hide = true;
+  regions: Region[] = Object.values(Region);
   constructor(private fb: FormBuilder,
               private usersService: UsersService,
               private snackbar: MatSnackBar,
@@ -48,6 +56,7 @@ export class RegisterPageComponent {
       firstName: ['', [Validators.required]],
       lastName: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(8)]],
+      region: [Region.RS11_BELGRADE, [Validators.required]]
     });
   }
 
@@ -55,7 +64,8 @@ export class RegisterPageComponent {
     if (!this.registerForm.valid) {
       return;
     }
-    this.usersService.register(this.registerForm.value).subscribe({
+    const request: RegisterUserRequest = this.registerForm.value;
+    this.usersService.register(request).subscribe({
       next: () => {
         this.snackbar.open("Registracija uspesna. Molimo vas da se ulogujete.", undefined, {duration: 3000});
         this.auth0.loginWithRedirect();
@@ -63,4 +73,7 @@ export class RegisterPageComponent {
       error: () => this.snackbar.open("Doslo je do greske", undefined, { duration: 3000 })
     })
   }
+
+  protected readonly RegionUtil = RegionUtil;
+  protected readonly Region = Region;
 }

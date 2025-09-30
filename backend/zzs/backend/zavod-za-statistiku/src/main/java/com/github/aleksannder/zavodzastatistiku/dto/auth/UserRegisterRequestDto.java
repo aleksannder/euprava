@@ -1,5 +1,6 @@
 package com.github.aleksannder.zavodzastatistiku.dto.auth;
 
+import com.github.aleksannder.zavodzastatistiku.model.enums.Region;
 import com.github.aleksannder.zavodzastatistiku.model.enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -11,5 +12,6 @@ public record UserRegisterRequestDto(
         @NotBlank String firstName,
         @NotBlank String lastName,
         @NotBlank @Size(min=8, message = "Password must be at least 8 characters") String password,
-        @NotNull Role role
+        @NotNull Role role,
+        @NotNull Region region
 ) {}

@@ -1,0 +1,33 @@
+.traffic-page {
+  padding: 2rem;
+
+  h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+  }
+
+  .charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+
+    mat-card {
+      padding: 1rem;
+      h2 {
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+        text-align: center;
+      }
+    }
+
+    // poslednji chart neka ide preko cele širine
+    mat-card:last-child {
+      grid-column: 1 / span 2;
+    }
+  }
+
+  .table {
+    margin-top: 2rem;
+  }
+}

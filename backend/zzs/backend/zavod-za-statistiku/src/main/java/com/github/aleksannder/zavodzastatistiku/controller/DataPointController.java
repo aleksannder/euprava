@@ -46,4 +46,9 @@ public class DataPointController {
                 .contentType(MediaType.parseMediaType("text/csv"))
                 .body(csv);
     }
+
+    @GetMapping("/indicator/{indicatorId}")
+    public ResponseEntity<List<DataPointResponse>> getByIndicatorId(@PathVariable Long indicatorId) {
+        return ResponseEntity.ok(dataPointService.getByIndicatorId(indicatorId));
+    }
 }

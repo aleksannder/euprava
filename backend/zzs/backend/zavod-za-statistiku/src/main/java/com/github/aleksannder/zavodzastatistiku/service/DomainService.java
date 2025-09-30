@@ -18,7 +18,7 @@ public class DomainService {
     }
 
     public List<Domain> getAll() {
-        return domainRepository.findAll();
+        return domainRepository.findAllWithSubdomains();
     }
 
     public void deleteById(Long id) {

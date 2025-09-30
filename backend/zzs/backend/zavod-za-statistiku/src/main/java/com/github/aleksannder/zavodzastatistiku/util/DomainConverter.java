@@ -14,14 +14,6 @@ public class DomainConverter {
         return new DomainResponse(domain.getId(), domain.getCode(), domain.getName(), domain.getSubdomains());
     }
 
-    public Domain toDomain(DomainResponse domainResponse) {
-        return Domain.builder()
-                .id(domainResponse.id())
-                .name(domainResponse.name())
-                .code(domainResponse.code())
-                .build();
-    }
-
     public List<DomainResponse> toDomainResponse(List<Domain> domains) {
         List<DomainResponse> responses = new ArrayList<>();
         domains.forEach(domain -> responses.add(toDomainResponse(domain)));

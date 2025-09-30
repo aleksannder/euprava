@@ -52,4 +52,8 @@ public class IndicatorService {
     public void delete(Long id) {
         repository.deleteById(id);
     }
+
+    public List<Indicator> getBySubdomainId(Long subdomainId) {
+        return repository.findAllBySubdomainId(subdomainId);
+    }
 }

@@ -40,5 +40,9 @@ public class SubdomainService {
         return subdomainRepository.save(subdomain);
     }
 
+    public Subdomain getByCode(String code) {
+        if (code == null || code.isEmpty()) return null;
+        return subdomainRepository.findByCode(code);
+    }
 
 }

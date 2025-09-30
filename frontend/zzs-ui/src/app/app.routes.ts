@@ -9,6 +9,13 @@ import {
   UnauthorizedPageComponent
 } from './components/pages/unauthorized-page/unauthorized-page.component';
 import {NotFoundPageComponent} from './components/pages/not-found-page/not-found-page.component';
+import {DomainsComponent} from './components/pages/domains/domains.component';
+import {HomeComponent} from './components/pages/home/home.component';
+import {SubdomainComponent} from './components/pages/subdomain/subdomain.component';
+import {PopulationPageComponent} from './components/pages/population-page/population-page.component';
+import {GdpPageComponent} from './components/pages/gdp-page/gdp-page.component';
+import {WagePageComponent} from './components/pages/wage-page/wage-page.component';
+import {TrafficPageComponent} from './components/pages/traffic-page/traffic-page.component';
 
 export const routes: Routes = [
     // Login
@@ -19,9 +26,20 @@ export const routes: Routes = [
   {
     path: 'register', canActivate: [], component: RegisterPageComponent
   },
-    // Citizen routes
   {
-    path: 'dashboard', canActivate: [], component: DashboardPageComponent
+    path: 'home', canActivate: [], component: HomeComponent
+  },
+  {
+    path: 'population', canActivate: [], component: PopulationPageComponent
+  },
+  {
+    path: 'gdp', canActivate: [], component: GdpPageComponent
+  },
+  {
+    path: 'wage', canActivate: [], component: WagePageComponent
+  },
+  {
+    path: 'traffic', canActivate: [], component: TrafficPageComponent
   },
 
 
@@ -36,6 +54,6 @@ export const routes: Routes = [
 
   // Wildcard
   {
-    path: '**', redirectTo: 'not-found'
+    path: '**', redirectTo: 'home'
   },
 ];

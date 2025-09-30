@@ -42,6 +42,7 @@ public class UserService {
                 .lastName(registerRequest.lastName())
                 .auth0UserId(auth0UserId)
                 .roles(Set.of(Role.valueOf(roleCitizen)))
+                .region(registerRequest.region())
                 .build();
 
         userRepository.save(u);

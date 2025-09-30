@@ -46,4 +46,11 @@ public class SubdomainController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/code/{code}")
+    public ResponseEntity<SubdomainResponse> getSubdomainByCode(@PathVariable String code) {
+        Subdomain s = subdomainService.getByCode(code);
+        if (s == null) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(new SubdomainResponse(s.getId(), s.getCode(), s.getName(), s.getDomain().getId()));
+    }
+
 }

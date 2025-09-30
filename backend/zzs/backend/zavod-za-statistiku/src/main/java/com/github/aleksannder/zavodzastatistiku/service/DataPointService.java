@@ -26,19 +26,23 @@ public class DataPointService {
 
     private DataPointResponse toResponse(DataPoint dp) {
         try {
-            Map<String, Object> dims = objectMapper.readValue(dp.getDims(), new TypeReference<>() {});
-            Map<String, Object> measures = objectMapper.readValue(dp.getMeasures(), new TypeReference<>() {});
 
             return new DataPointResponse(
                     dp.getId(),
                     dp.getIndicator().getId(),
                     dp.getDatasetVersion().getId(),
-                    dims,
-                    measures,
+                    dp.getDims(),
+                    dp.getMeasures(),
                     dp.getCreatedAt()
             );
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse datapoint JSON", e);
         }
+    }
+
+    public List<DataPointResponse> getByIndicatorId(Long indicatorId) {
+        return dataPointRepository.findAllByIndicatorId(indicatorId).stream()
+                .map(this::toResponse)
+                .toList();
     }
 }

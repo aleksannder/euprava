@@ -1,5 +1,6 @@
 package com.github.aleksannder.zavodzastatistiku.model;
 
+import com.github.aleksannder.zavodzastatistiku.model.enums.Region;
 import com.github.aleksannder.zavodzastatistiku.model.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,6 +30,10 @@ public class User {
 
     private String lastName;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 32)
+    private Region region;
+    
     @CreationTimestamp
     private Instant createdAt;
 

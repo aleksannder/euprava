@@ -13,15 +13,17 @@
           <mat-label>E-mail adresa</mat-label>
           <input matInput formControlName="email" placeholder="Unesite vašu e-mail adresu">
           <mat-icon matSuffix>email</mat-icon>
+          <mat-error *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+            Unesite validnu e-mail adresu
+          </mat-error>
         </mat-form-field>
 
         <div class="actions">
-          <button mat-flat-button color="secondary" type="submit"  class="actionBtn" (click)="onSubmit()">
+          <button mat-flat-button color="primary" type="submit" class="actionBtn">
             Ulogujte se
           </button>
 
-
-          <span>
+          <span class="redirect-text">
             Nemate nalog?
             <a [routerLink]="['/register']">Registrujte se ovde</a>
           </span>

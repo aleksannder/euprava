@@ -1,14 +1,14 @@
+import {Region} from './enums/region.enum';
+
 export interface RegisterUserRequest {
   firstName: string;
   lastName: string;
   email: string;
   password: string;
   role: Role;
+  region: Region;
 }
 
-export interface RegisterUserResponse {
-  success: boolean;
-}
 
 export enum Role {
   ADMIN = 'ADMIN',

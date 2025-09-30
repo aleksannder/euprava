@@ -1,0 +1,9 @@
+<ng-container *ngIf="allDomains">
+  <div class="highlights">
+    <app-domain-card *ngFor="let d of domains"
+    [domain]="d"/>
+  </div>
+</ng-container>
+<ng-container *ngIf="!allDomains">
+  <p>specific domain page</p>
+</ng-container>

@@ -1,0 +1,30 @@
+<div class="wage-page">
+  <h1>Zaposlenost i Plate</h1>
+
+  <div class="highlight-container" *ngIf="highlight">
+    <mat-card matTooltip="Rast: {{highlight.growthRsd | number:'1.0-0'}} RSD">
+      <h2>{{highlight.growthPercent | number:'1.1-2'}} %</h2>
+      <p>Najveći rast plata - {{RegionUtil.getLabel(highlight.region)}}</p>
+    </mat-card>
+  </div>
+
+  <div class="charts">
+    <p-chart type="line" [data]="trendChartData" [options]="chartOptions"></p-chart>
+    <p-chart type="bar" [data]="comparisonChartData" [options]="chartOptions"></p-chart>
+  </div>
+
+  <div class="table">
+    <app-data-table
+      [columns]="[
+        { key: 'year', label: 'Godina' },
+        { key: 'region', label: 'Region' },
+        { key: 'averageWage', label: 'Prosečna plata (RSD)' },
+        { key: 'growthPercent', label: 'Rast (%)' }
+      ]"
+      [data]="tableData"
+      [totalItems]="tableData.length"
+      [pageSize]="10"
+      [pageIndex]="0">
+    </app-data-table>
+  </div>
+</div>

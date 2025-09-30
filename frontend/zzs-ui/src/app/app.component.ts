@@ -1,30 +1,27 @@
 import { Component } from '@angular/core';
-import {NavigationEnd, Router, RouterOutlet} from '@angular/router';
+import {ActivatedRoute, Router, RouterOutlet} from '@angular/router';
 import {DashboardComponent} from './components/ui/dashboard/dashboard.component';
 import {FooterComponent} from './components/ui/footer/footer.component';
 import {NgIf} from '@angular/common';
-import {filter} from 'rxjs';
+import {DashboardPageComponent} from './components/pages/dashboard-page/dashboard-page.component';
+import {AuthService} from '@auth0/auth0-angular';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, DashboardComponent, FooterComponent, NgIf],
+  imports: [RouterOutlet, DashboardComponent, FooterComponent, NgIf, DashboardPageComponent],
   template: `
-    <app-dashboard *ngIf="!isAuthPage"></app-dashboard>
-    <router-outlet></router-outlet>
+    <app-dashboard-page *ngIf="!isAuthPage"></app-dashboard-page>
+    <router-outlet *ngIf="isAuthPage"></router-outlet>
   `,
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  isAuthPage = false;
 
-  constructor(private router: Router) {
-    this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe((e: NavigationEnd) => {
-        const url = e.urlAfterRedirects.toLowerCase();
-        const authPages = ['/login', '/register', '/unauthorized', '/not-found'];
-        this.isAuthPage = authPages.some(path => url.startsWith(path));
-      });
+  constructor(private router: Router) {}
+
+  get isAuthPage(): boolean {
+    const url = this.router.url;
+    return url.startsWith('/login') || url.startsWith('/register');
   }
 }

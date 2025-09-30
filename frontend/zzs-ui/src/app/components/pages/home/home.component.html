@@ -1,0 +1,35 @@
+<div class="dashboard-container" *ngIf="dashboard">
+  <h1>Pregled za {{RegionUtil.getLabel(dashboard.region)}}</h1>
+
+  <div class="cards">
+    <mat-card class="stat-card">
+      <mat-card-header><mat-card-title>Stanovništvo</mat-card-title></mat-card-header>
+      <mat-card-content>{{dashboard!.population | number}}</mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-header><mat-card-title>Prosečna starost</mat-card-title></mat-card-header>
+      <mat-card-content>{{dashboard!.averageAge | number:'1.0-1'}} god.</mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-header><mat-card-title>BDP</mat-card-title></mat-card-header>
+      <mat-card-content>{{dashboard!.gdpBillion | number:'1.1-2'}} mlrd €</mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-header><mat-card-title>Prosečna plata</mat-card-title></mat-card-header>
+      <mat-card-content>{{dashboard!.wage | number:'1.0-0'}} RSD</mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-header><mat-card-title>Registrovana vozila</mat-card-title></mat-card-header>
+      <mat-card-content>{{dashboard!.registeredVehicles | number}}</mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card">
+      <mat-card-header><mat-card-title>Saobraćajne nesreće</mat-card-title></mat-card-header>
+      <mat-card-content>{{dashboard!.trafficAccidents | number}}</mat-card-content>
+    </mat-card>
+  </div>
+</div>

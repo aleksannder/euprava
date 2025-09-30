@@ -1,0 +1,28 @@
+<h1 mat-dialog-title>Import CSV</h1>
+<div mat-dialog-content>
+  <mat-form-field appearance="outline" class="w-100">
+    <mat-label>Dataset</mat-label>
+    <mat-select [(ngModel)]="selectedDataset" (selectionChange)="loadVersions()">
+      <mat-option *ngFor="let d of datasets" [value]="d">{{ d.name }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="w-100" *ngIf="versions.length > 0">
+    <mat-label>Version</mat-label>
+    <mat-select [(ngModel)]="selectedVersion">
+      <mat-option *ngFor="let v of versions" [value]="v">{{ v.version }}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <input type="file" (change)="onFileSelected($event)" accept=".csv"/>
+  <p *ngIf="fileName">{{ fileName }}</p>
+</div>
+
+<div mat-dialog-actions>
+  <button mat-button (click)="close()">Cancel</button>
+  <button mat-raised-button color="primary"
+          (click)="upload()"
+          [disabled]="!selectedFile || !selectedDataset || !selectedVersion">
+    Upload
+  </button>
+</div>

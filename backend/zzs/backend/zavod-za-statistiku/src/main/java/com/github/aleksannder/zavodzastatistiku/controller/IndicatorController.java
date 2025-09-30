@@ -50,4 +50,10 @@ public class IndicatorController {
         service.delete(indicatorId);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/subdomain/{subdomainId}")
+    public ResponseEntity<List<IndicatorResponse>> getBySubdomain(@PathVariable Long subdomainId) {
+        List<Indicator> indicators = service.getBySubdomainId(subdomainId);
+        return ResponseEntity.ok(indicators.stream().map(IndicatorConverter::toResponse).toList());
+    }
 }
