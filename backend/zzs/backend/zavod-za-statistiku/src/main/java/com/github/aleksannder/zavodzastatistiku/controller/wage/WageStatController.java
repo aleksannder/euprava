@@ -1,6 +1,6 @@
 package com.github.aleksannder.zavodzastatistiku.controller.wage;
 
-import com.github.aleksannder.zavodzastatistiku.dto.WageStatDto;
+import com.github.aleksannder.zavodzastatistiku.dto.wage.WageStatDto;
 import com.github.aleksannder.zavodzastatistiku.model.enums.Region;
 import com.github.aleksannder.zavodzastatistiku.model.wage.WageStat;
 import com.github.aleksannder.zavodzastatistiku.service.wage.WageStatService;

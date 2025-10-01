@@ -1,0 +1,20 @@
+<h1 mat-dialog-title>Kreiraj anketu</h1>
+<div mat-dialog-content>
+  <form [formGroup]="form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Naziv ankete</mat-label>
+      <input matInput formControlName="title" placeholder="Unesite naziv">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Oblast</mat-label>
+      <mat-select formControlName="type">
+        <mat-option *ngFor="let t of surveyTypes" [value]="t">{{ SurveyDomainUtil.getLabel(t)}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </form>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-button (click)="dialogRef.close()">Otkaži</button>
+  <button mat-flat-button color="primary" (click)="create()">Kreiraj</button>
+</div>

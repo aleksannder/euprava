@@ -1,6 +1,6 @@
 package com.github.aleksannder.zavodzastatistiku.controller.gdp;
 
-import com.github.aleksannder.zavodzastatistiku.dto.GdpGrowthHighlight;
+import com.github.aleksannder.zavodzastatistiku.dto.gdp.GdpGrowthHighlight;
 import com.github.aleksannder.zavodzastatistiku.model.enums.Region;
 import com.github.aleksannder.zavodzastatistiku.model.gdp.GdpStat;
 import com.github.aleksannder.zavodzastatistiku.service.gdp.GdpStatService;

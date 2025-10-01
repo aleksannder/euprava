@@ -1,6 +1,5 @@
 package com.github.aleksannder.zavodzastatistiku.controller.population;
 
-import com.github.aleksannder.zavodzastatistiku.dto.AvgAgeDto;
 import com.github.aleksannder.zavodzastatistiku.dto.population.ExtremesDto;
 import com.github.aleksannder.zavodzastatistiku.dto.population.ProjectionDto;
 import com.github.aleksannder.zavodzastatistiku.dto.population.RegionValueDto;
@@ -12,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/population")

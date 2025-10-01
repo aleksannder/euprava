@@ -1,6 +1,5 @@
 package com.github.aleksannder.zavodzastatistiku.service.population;
 
-import com.github.aleksannder.zavodzastatistiku.dto.AvgAgeDto;
 import com.github.aleksannder.zavodzastatistiku.dto.population.ExtremesDto;
 import com.github.aleksannder.zavodzastatistiku.dto.population.ProjectionDto;
 import com.github.aleksannder.zavodzastatistiku.dto.population.RegionValueDto;
