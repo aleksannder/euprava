@@ -10,7 +10,7 @@ export class PopulationService {
 
   constructor(private http: HttpClient) {}
 
-  getAll(): Observable<PopulationStat[]> {
+  getAll(page = 0, size = 10, sort = 'year,desc'): Observable<PopulationStat[]> {
     return this.http.get<PopulationStat[]>(`${this.controllerUrl}`);
   }
 

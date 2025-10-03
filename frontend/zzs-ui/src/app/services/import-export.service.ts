@@ -4,14 +4,20 @@ import {Observable} from 'rxjs';
 
 @Injectable({providedIn: 'root'})
 export class ImportExportService {
-  private baseUrl: string = 'http://localhost:8080/api/datapoints';
+  private baseUrl: string = 'http://localhost:8080/api/import-export';
 
   constructor(private http: HttpClient) {}
 
-  uploadCsv(datasetVersionId: number, indicatorId: number, file: File): Observable<any> {
+  uploadCsv(domain: string, file: File): Observable<any> {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post(`${this.baseUrl}/import/${datasetVersionId}/${indicatorId}`, formData, {})
+    return this.http.post(`${this.baseUrl}/${domain}/import`, formData, {})
+  }
+
+  exportCsv(domain: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/${domain}/export`, {
+      responseType: 'blob',
+    });
   }
 
 

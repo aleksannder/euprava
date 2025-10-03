@@ -4,42 +4,30 @@ import com.example.demo.dto.SaobracajnaDozvolaRequest;
 import com.example.demo.model.*;
 import com.example.demo.repository.KorisnikRepository;
 import com.example.demo.repository.SaobracajnaDozvolaRepository;
-import com.example.demo.security.JwtService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class SaobracajnaDozvolaService {
 
     private final SaobracajnaDozvolaRepository repo;
     private final KorisnikRepository korisnikRepository;
-    private final JwtService jwtService;
 
-    public SaobracajnaDozvolaService(SaobracajnaDozvolaRepository repo,
-                                     KorisnikRepository korisnikRepository,
-                                     JwtService jwtService) {
-        this.repo = repo;
-        this.korisnikRepository = korisnikRepository;
-        this.jwtService = jwtService;
-    }
 
     public SaobracajnaDozvola podnesiZahtev(String token, SaobracajnaDozvolaRequest req) {
-        if (token.startsWith("Bearer ")) token = token.substring(7);
-        String email = jwtService.extractEmail(token);
-
-        Korisnik korisnik = korisnikRepository.findByEmail(email)
+        Korisnik korisnik = korisnikRepository.findByEmail(token)
                 .orElseThrow(() -> new IllegalArgumentException("Korisnik ne postoji"));
 
         // Dohvati sve zahteve korisnika za proveru po tablicama
-        List<SaobracajnaDozvola> sviZahtevi = repo.findAllByKorisnik(korisnik);
+        List<SaobracajnaDozvola> sviZahtevi = repo.findAllByUser(korisnik);
 
         // Proveri da li postoji aktivan zahtev za iste tablice
         boolean postojiAktivanZahtev = sviZahtevi.stream()
-                .anyMatch(s -> s.getTablice().equalsIgnoreCase(req.getTablice()) &&
+                .anyMatch(s -> s.getPlateNumber().equalsIgnoreCase(req.getTablice()) &&
                         (s.getStatus() == StatusZahteva.CEKANJE || s.getStatus() == StatusZahteva.DOZVOLJEN));
 
         if (postojiAktivanZahtev) {
@@ -49,7 +37,7 @@ public class SaobracajnaDozvolaService {
 
         // Ako tablica postoji ali je prethodni zahtev odbijen, dozvoljeno je ponovo podneti zahtev
         boolean tablicaPostojiOdbijena = sviZahtevi.stream()
-                .anyMatch(s -> s.getTablice().equalsIgnoreCase(req.getTablice()) &&
+                .anyMatch(s -> s.getPlateNumber().equalsIgnoreCase(req.getTablice()) &&
                         s.getStatus() == StatusZahteva.ODBIJEN);
 
         if (tablicaPostojiOdbijena) {
@@ -72,27 +60,24 @@ public class SaobracajnaDozvolaService {
                 req.getGodiste(),
                 req.getVrstaPogona(),
                 req.getTablice(),
-                korisnik.getAdresa()
+                korisnik.getAddress()
         );
-        saobracajna.setBrojDozvole(generisiBrojDozvole());
+        saobracajna.setDrivingLicenseNumber(generisiBrojDozvole());
         return saobracajna;
     }
 
 
     public List<SaobracajnaDozvola> produzi(String token) {
-        if (token.startsWith("Bearer ")) token = token.substring(7);
-        String email = jwtService.extractEmail(token);
-
-        Korisnik korisnik = korisnikRepository.findByEmail(email)
+        Korisnik korisnik = korisnikRepository.findByEmail(token)
                 .orElseThrow(() -> new IllegalArgumentException("Korisnik ne postoji"));
 
         LocalDate danas = LocalDate.now();
 
         // Dohvati sve odobrene dozvole korisnika
-        List<SaobracajnaDozvola> sveDozvole = repo.findAllByKorisnik(korisnik);
+        List<SaobracajnaDozvola> sveDozvole = repo.findAllByUser(korisnik);
         List<SaobracajnaDozvola> doProduzenja = sveDozvole.stream()
                 .filter(s -> s.getStatus() == StatusZahteva.DOZVOLJEN)
-                .filter(s -> !s.getDatumVazenja().isAfter(danas.plusMonths(1))) // ističe za manje od mesec dana
+                .filter(s -> !s.getValidUntil().isAfter(danas.plusMonths(1))) // ističe za manje od mesec dana
                 .toList();
 
         if (doProduzenja.isEmpty()) {
@@ -101,9 +86,9 @@ public class SaobracajnaDozvolaService {
 
         // Produži sve pronađene
         for (SaobracajnaDozvola s : doProduzenja) {
-            s.setDatumIzdavanja(danas);
-            s.setDatumVazenja(danas.plusYears(5));
-            s.setBrojDozvole(generisiBrojDozvole());
+            s.setDateOfIssuing(danas);
+            s.setValidUntil(danas.plusYears(5));
+            s.setDrivingLicenseNumber(generisiBrojDozvole());
             repo.save(s);
         }
 
@@ -112,16 +97,13 @@ public class SaobracajnaDozvolaService {
 
 
     public List<SaobracajnaDozvola> prikaziSveZahteve(String token) {
-        if (token.startsWith("Bearer ")) token = token.substring(7);
-        String email = jwtService.extractEmail(token);
-
-        Korisnik korisnik = korisnikRepository.findByEmail(email)
+        Korisnik korisnik = korisnikRepository.findByEmail(token)
                 .orElseThrow(() -> new IllegalArgumentException("Korisnik ne postoji"));
 
-        if (korisnik.getRola().name().equals("EMPLOYER")) {
+        if (korisnik.getRole().name().equals("EMPLOYER")) {
             return repo.findAll();
         }
-        return repo.findAllByKorisnik(korisnik);
+        return repo.findAllByUser(korisnik);
     }
 
     public SaobracajnaDozvola odobriZahtev(Long id) {
@@ -149,7 +131,7 @@ public class SaobracajnaDozvolaService {
                 .orElseThrow(() -> new IllegalArgumentException("Saobraćajna dozvola ne postoji"));
 
         // Proveravamo da li dokument pripada korisniku
-        if (!s.getKorisnik().getEmail().equals(email)) {
+        if (!s.getUser().getEmail().equals(email)) {
             throw new IllegalArgumentException("Nije vaš dokument");
         }
 

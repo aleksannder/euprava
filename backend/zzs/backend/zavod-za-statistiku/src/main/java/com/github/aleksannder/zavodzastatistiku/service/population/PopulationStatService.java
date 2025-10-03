@@ -7,6 +7,8 @@ import com.github.aleksannder.zavodzastatistiku.model.enums.Region;
 import com.github.aleksannder.zavodzastatistiku.model.population.PopulationStat;
 import com.github.aleksannder.zavodzastatistiku.repository.population.PopulationStatRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -20,8 +22,8 @@ import java.util.stream.Collectors;
 public class PopulationStatService {
     private final PopulationStatRepository repository;
 
-    public List<PopulationStat> findAll() {
-        return repository.findAll();
+    public Page<PopulationStat> findAll(Pageable pageable) {
+        return repository.findAll(pageable);
     }
 
     public PopulationStat findById(Long id) {

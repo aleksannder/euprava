@@ -3,6 +3,7 @@ import {HttpClient} from '@angular/common/http';
 import {WageGrowth, WageStat} from '../model/wage.model';
 import {Observable} from 'rxjs';
 import {Region} from '../model/enums/region.enum';
+import {Page} from '../model/page.model';
 
 @Injectable({providedIn: 'root'})
 export class WageService {
@@ -10,8 +11,8 @@ export class WageService {
 
   constructor(private http: HttpClient) {}
 
-  getAll(): Observable<WageStat[]> {
-    return this.http.get<WageStat[]>(`${this.controllerUrl}`);
+  getAll(page = 0, size = 10, sort = 'year,desc'): Observable<Page<WageStat>> {
+    return this.http.get<Page<WageStat>>(`${this.controllerUrl}?page=${page}&size=${size}&sort=${sort}`);
   }
 
   getById(id: number): Observable<WageStat> {

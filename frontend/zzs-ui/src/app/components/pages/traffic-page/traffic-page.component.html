@@ -1,24 +1,33 @@
 <div class="traffic-page">
   <h1>Saobraćajna statistika</h1>
 
+
+  <!-- Charts -->
   <div class="charts">
     <mat-card>
-      <h2>Trend vozila i nesreća po godinama</h2>
+      <h3>Trend vozila i nesreća po godinama</h3>
       <p-chart type="line" [data]="summaryData" [options]="chartOptions"></p-chart>
     </mat-card>
 
     <mat-card>
-      <h2>Najopasniji regioni</h2>
+      <h3>Najopasniji regioni</h3>
       <p-chart type="bar" [data]="dangerousRegionsData" [options]="chartOptions"></p-chart>
     </mat-card>
 
     <mat-card>
-      <h2>Trend poginulih po regionima</h2>
+      <h3>Trend poginulih po regionima</h3>
       <p-chart type="line" [data]="fatalitiesTrendData" [options]="chartOptions"></p-chart>
     </mat-card>
   </div>
 
-  <div class="table">
+  <div class="table-container">
+    <div class="table-header">
+      <h3>Pregled podataka</h3>
+      <button mat-icon-button color="primary" (click)="exportCsv()" matTooltip="Izvezi kao CSV">
+        <mat-icon>download</mat-icon>
+      </button>
+    </div>
+
     <app-data-table
       [columns]="columns"
       [data]="tableData"

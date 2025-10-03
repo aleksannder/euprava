@@ -10,22 +10,22 @@ import {VozackaComponent} from "./components/vozacka/vozacka.component";
 import {SaobracajnaComponent} from "./components/saobracajna/saobracajna.component";
 import {OruzjeComponent} from "./components/oruzje/oruzje.component";
 import {OstaloComponent} from "./components/ostalo/ostalo.component";
-import {authGuard, roleGuard} from "./guards/AuthGuard";
-import {Role} from "./models/korisnik";
+import {authGuard, citizenGuard} from "./guards/AuthGuard";
+import {SurveysComponent} from "./components/surveys/surveys.component";
 
 const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'custom-alert', component: CustomAlertComponent },
-  { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard, () =>  roleGuard([Role.CITIZEN, Role.EMPLOYER])] },
-  { path: 'licna', component: LicnaComponent, canActivate: [authGuard, () =>  roleGuard([Role.CITIZEN, Role.EMPLOYER])] },
-  { path: 'profile', component: ProfileComponent, canActivate: [authGuard,() =>  roleGuard([Role.CITIZEN, Role.EMPLOYER])] },
-  { path: 'vozacka', component: VozackaComponent, canActivate: [authGuard,() =>  roleGuard([Role.CITIZEN, Role.EMPLOYER])] },
-  { path: 'saobracajna', component: SaobracajnaComponent, canActivate: [authGuard, () =>  roleGuard([Role.CITIZEN, Role.EMPLOYER])] },
-  { path: 'oruzje', component: OruzjeComponent, canActivate: [authGuard,() =>  roleGuard([Role.CITIZEN, Role.EMPLOYER])]},
-  { path: 'ostalo', component: OstaloComponent, canActivate: [authGuard,() =>  roleGuard([Role.CITIZEN, Role.EMPLOYER])]},
-
+  { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
+  { path: 'licna', component: LicnaComponent, canActivate: [authGuard] },
+  { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
+  { path: 'vozacka', component: VozackaComponent, canActivate: [authGuard] },
+  { path: 'saobracajna', component: SaobracajnaComponent, canActivate: [authGuard] },
+  { path: 'oruzje', component: OruzjeComponent, canActivate: [authGuard]},
+  { path: 'ostalo', component: OstaloComponent, canActivate: [authGuard]},
+  { path: 'surveys', component: SurveysComponent, canActivate: [authGuard, citizenGuard]},
 ];
 
 @NgModule({

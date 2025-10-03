@@ -5,6 +5,8 @@ import com.github.aleksannder.zavodzastatistiku.model.enums.Region;
 import com.github.aleksannder.zavodzastatistiku.model.wage.WageStat;
 import com.github.aleksannder.zavodzastatistiku.repository.wage.WageStatRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,8 +17,8 @@ public class WageStatService {
 
     private final WageStatRepository wageStatRepository;
 
-    public List<WageStat> findAll() {
-        return wageStatRepository.findAll();
+    public Page<WageStat> findAll(Pageable pageable) {
+        return wageStatRepository.findAll(pageable);
     }
 
     public WageStat findById(Long id) {

@@ -7,8 +7,6 @@ import com.example.demo.model.Role;
 import com.example.demo.model.StatusZahteva;
 import com.example.demo.repository.KorisnikRepository;
 import com.example.demo.repository.OruzjeRepository;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -30,9 +28,9 @@ public class OruzjeService {
         Korisnik korisnik = korisnikRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Korisnik nije pronađen"));
 
-        for (String kategorija : request.getKategorijaOruzja()) {
-            boolean postojiAktivan = repository.existsByKorisnik_KorisnikIDAndKategorijaOruzjaContainingAndStatusIn(
-                    korisnik.getKorisnikID(),
+        for (String kategorija : request.getGunCategories()) {
+            boolean postojiAktivan = repository.existsByUser_IdAndGunCategoryContainingAndStatusIn(
+                    korisnik.getId(),
                     kategorija,
                     List.of(StatusZahteva.CEKANJE, StatusZahteva.DOZVOLJEN)
             );
@@ -41,16 +39,16 @@ public class OruzjeService {
             }
         }
 
-        String noveKategorije = String.join(",", request.getKategorijaOruzja());
-        String ime = korisnik.getIme();
-        String prezime = korisnik.getPrezime();
+        String noveKategorije = String.join(",", request.getGunCategories());
+        String ime = korisnik.getFirstName();
+        String prezime = korisnik.getLastName();
         String regBroj = generisiRegBroj();
-        LocalDate datumDo = request.getDatumOd().plusYears(10);
+        LocalDate datumDo = request.getDateFrom().plusYears(10);
 
         Oruzje o = Oruzje.kreiraj(
                 ime,
                 prezime,
-                request.getDatumOd(),
+                request.getDateFrom(),
                 datumDo,
                 regBroj,
                 noveKategorije,
@@ -88,11 +86,11 @@ public class OruzjeService {
 
         List<Oruzje> zahteviZaProduzenje = repository.findAll().stream()
                 .filter(z -> z.getStatus() == StatusZahteva.DOZVOLJEN)
-                .filter(z -> !z.getDatumDo().isAfter(threshold))
+                .filter(z -> !z.getDateTo().isAfter(threshold))
                 .toList();
 
         for (Oruzje o : zahteviZaProduzenje) {
-            o.setDatumDo(o.getDatumDo().plusYears(10));
+            o.setDateTo(o.getDateTo().plusYears(10));
             repository.save(o);
         }
 
@@ -105,7 +103,7 @@ public class OruzjeService {
         } else {
             Korisnik korisnik = korisnikRepository.findByEmail(email)
                     .orElseThrow(() -> new IllegalArgumentException("Korisnik nije pronađen"));
-            return repository.findByKorisnik_KorisnikID(korisnik.getKorisnikID());
+            return repository.findByUser_Id(korisnik.getId());
         }
     }
 
@@ -113,7 +111,7 @@ public class OruzjeService {
         Oruzje o = repository.findById(oruzjeId)
                 .orElseThrow(() -> new IllegalArgumentException("Oružje ne postoji"));
 
-        if (!o.getKorisnik().getEmail().equals(email)) {
+        if (!o.getUser().getEmail().equals(email)) {
             throw new IllegalArgumentException("Nije vaš dokument");
         }
 

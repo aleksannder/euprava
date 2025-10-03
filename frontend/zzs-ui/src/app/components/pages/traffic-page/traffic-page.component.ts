@@ -16,6 +16,10 @@ import {RegionUtil} from '../../../services/util/region.util';
 import {ChartModule} from 'primeng/chart';
 import {DataTableComponent} from '../../ui/data-table/data-table.component';
 import {Page} from '../../../model/page.model';
+import {MatIcon} from '@angular/material/icon';
+import {MatButton, MatIconButton} from '@angular/material/button';
+import {MatTooltip} from '@angular/material/tooltip';
+import {ImportExportService} from '../../../services/import-export.service';
 
 @Component({
   selector: 'app-traffic-page',
@@ -35,7 +39,11 @@ import {Page} from '../../../model/page.model';
     MatRow,
     DecimalPipe,
     ChartModule,
-    DataTableComponent
+    DataTableComponent,
+    MatIcon,
+    MatButton,
+    MatIconButton,
+    MatTooltip
   ],
   templateUrl: './traffic-page.component.html',
   styleUrl: './traffic-page.component.scss'
@@ -58,7 +66,7 @@ export class TrafficPageComponent implements OnInit {
       { key: 'fatalities', label: 'Poginuli' }
     ];
 
-    constructor(private trafficService: TrafficService) {}
+    constructor(private trafficService: TrafficService, private csvService: ImportExportService) {}
 
     ngOnInit(): void {
         this.loadSummary();
@@ -81,7 +89,8 @@ export class TrafficPageComponent implements OnInit {
     }
 
     loadDangerousRegions(): void {
-      this.trafficService.getDangerousRegions(2023).subscribe((data: DangerousRegion[]) => {
+      const currentYear: number = new Date(Date.now()).getFullYear();
+      this.trafficService.getDangerousRegions(currentYear - 1).subscribe((data: DangerousRegion[]) => {
         this.dangerousRegionsData = {
           labels: data.map(d => RegionUtil.getLabel(d.region)),
           datasets: [{ label: 'Prosečne nesreće', data: data.map(d => d.avgAccidents), backgroundColor: '#FF7043' }]
@@ -126,5 +135,18 @@ export class TrafficPageComponent implements OnInit {
 
     private randomColor() {
       return `#${Math.floor(Math.random()*16777215).toString(16)}`;
+    }
+
+    exportCsv() {
+      this.csvService.exportCsv('TRAFFIC').subscribe(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'traffic-data.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      })
     }
 }

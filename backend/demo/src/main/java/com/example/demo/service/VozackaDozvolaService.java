@@ -5,41 +5,29 @@ import com.example.demo.model.StatusZahteva;
 import com.example.demo.model.VozackaDozvola;
 import com.example.demo.repository.KorisnikRepository;
 import com.example.demo.repository.VozackaDozvolaRepository;
-import com.example.demo.security.JwtService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class VozackaDozvolaService {
 
     private final VozackaDozvolaRepository vozackaRepository;
     private final KorisnikRepository korisnikRepository;
-    private final JwtService jwtService;
 
-    public VozackaDozvolaService(VozackaDozvolaRepository vozackaRepository,
-                                 KorisnikRepository korisnikRepository,
-                                 JwtService jwtService) {
-        this.vozackaRepository = vozackaRepository;
-        this.korisnikRepository = korisnikRepository;
-        this.jwtService = jwtService;
-    }
 
     public VozackaDozvola podnesiZahtev(String token, List<String> noveKategorije) {
-        if (token.startsWith("Bearer ")) token = token.substring(7);
-        String email = jwtService.extractEmail(token);
-
-        Korisnik korisnik = korisnikRepository.findByEmail(email)
+        Korisnik korisnik = korisnikRepository.findByEmail(token)
                 .orElseThrow(() -> new IllegalArgumentException("Korisnik ne postoji"));
 
-        List<VozackaDozvola> sviZahtevi = vozackaRepository.findAllByKorisnik(korisnik);
+        List<VozackaDozvola> sviZahtevi = vozackaRepository.findAllByUser(korisnik);
 
         for (String kategorija : noveKategorije) {
             boolean postojiAktivanZaKategoriju = sviZahtevi.stream()
-                    .filter(v -> v.getKategorije().contains(kategorija))
+                    .filter(v -> v.getCategories().contains(kategorija))
                     .anyMatch(v -> v.getStatus() == StatusZahteva.CEKANJE || v.getStatus() == StatusZahteva.DOZVOLJEN);
 
             if (postojiAktivanZaKategoriju) {
@@ -47,27 +35,24 @@ public class VozackaDozvolaService {
             }
         }
 
-        VozackaDozvola vozacka = VozackaDozvola.kreiraj(korisnik, korisnik.getGrad(), noveKategorije);
-        vozacka.setBrojDozvole(generisiBrojDozvole());
+        VozackaDozvola vozacka = VozackaDozvola.kreiraj(korisnik, korisnik.getCity(), noveKategorije);
+        vozacka.setLicenseNumber(generisiBrojDozvole());
         return vozackaRepository.save(vozacka);
     }
 
 
 
     public List<VozackaDozvola> produziVozacku(String token) {
-        if (token.startsWith("Bearer ")) token = token.substring(7);
-        String email = jwtService.extractEmail(token);
-
-        Korisnik korisnik = korisnikRepository.findByEmail(email)
+        Korisnik korisnik = korisnikRepository.findByEmail(token)
                 .orElseThrow(() -> new IllegalArgumentException("Korisnik ne postoji"));
 
         LocalDate danas = LocalDate.now();
 
-        List<VozackaDozvola> sveDozvole = vozackaRepository.findAllByKorisnik(korisnik);
+        List<VozackaDozvola> sveDozvole = vozackaRepository.findAllByUser(korisnik);
 
         List<VozackaDozvola> doProduzenja = sveDozvole.stream()
                 .filter(v -> v.getStatus() == StatusZahteva.DOZVOLJEN)
-                .filter(v -> !v.getDatumVazenja().isAfter(danas.plusMonths(1)))
+                .filter(v -> !v.getValidUntil().isAfter(danas.plusMonths(1)))
                 .toList();
 
         if (doProduzenja.isEmpty()) {
@@ -75,9 +60,9 @@ public class VozackaDozvolaService {
         }
 
         for (VozackaDozvola v : doProduzenja) {
-            v.setDatumIzdavanja(danas);
-            v.setDatumVazenja(danas.plusYears(10));
-            v.setBrojDozvole(generisiBrojDozvole());
+            v.setDateOfIssuing(danas);
+            v.setValidUntil(danas.plusYears(10));
+            v.setLicenseNumber(generisiBrojDozvole());
             vozackaRepository.save(v);
         }
 
@@ -85,17 +70,14 @@ public class VozackaDozvolaService {
     }
 
     public List<VozackaDozvola> prikaziSveZahteve(String token) {
-        if (token.startsWith("Bearer ")) token = token.substring(7);
-        String email = jwtService.extractEmail(token);
-
-        Korisnik korisnik = korisnikRepository.findByEmail(email)
+        Korisnik korisnik = korisnikRepository.findByEmail(token)
                 .orElseThrow(() -> new IllegalArgumentException("Korisnik ne postoji"));
 
-        if (korisnik.getRola().name().equals("EMPLOYER")) {
+        if (korisnik.getRole().name().equals("EMPLOYER")) {
             return vozackaRepository.findAll();
         }
 
-        return vozackaRepository.findAllByKorisnik(korisnik);
+        return vozackaRepository.findAllByUser(korisnik);
     }
 
     public VozackaDozvola odobriZahtev(Long id) {
@@ -123,7 +105,7 @@ public class VozackaDozvolaService {
         VozackaDozvola v = vozackaRepository.findById(vozackaId)
                 .orElseThrow(() -> new IllegalArgumentException("Vozačka dozvola ne postoji"));
 
-        if (!v.getKorisnik().getEmail().equals(email)) {
+        if (!v.getUser().getEmail().equals(email)) {
             throw new IllegalArgumentException("Nije vaš dokument");
         }
 

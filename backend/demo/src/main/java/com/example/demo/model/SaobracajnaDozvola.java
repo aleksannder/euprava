@@ -11,28 +11,29 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "vehicle_licences")
 public class SaobracajnaDozvola extends VrstaZahteva {
 
-    private String marka;
+    private String make;
     private String model;
-    private int kubikaza;
-    private int godiste;
-    private String vrstaPogona;
-    private String tablice;
+    private int displacement;
+    private int manufacturedYear;
+    private String fuelSystem;
+    private String plateNumber;
 
-    private LocalDate datumIzdavanja;
-    private LocalDate datumVazenja;
+    private LocalDate dateOfIssuing;
+    private LocalDate validUntil;
 
-    private String ime;
-    private String prezime;
-    private String adresa;
+    private String firstName;
+    private String lastName;
+    private String address;
 
     @Column(unique = true, nullable = false)
-    private String brojDozvole;
+    private String drivingLicenseNumber;
 
     @ManyToOne
-    @JoinColumn(name = "korisnik_id", nullable = false)
-    private Korisnik korisnik;
+    @JoinColumn(name = "user_id", nullable = false)
+    private Korisnik user;
 
     @Enumerated(EnumType.STRING)
     private StatusZahteva status;
@@ -47,19 +48,19 @@ public class SaobracajnaDozvola extends VrstaZahteva {
                                              String adresa) {
         LocalDate danas = LocalDate.now();
         return SaobracajnaDozvola.builder()
-                .ime(korisnik.getIme())
-                .prezime(korisnik.getPrezime())
-                .adresa(adresa)
-                .marka(marka)
+                .firstName(korisnik.getFirstName())
+                .lastName(korisnik.getLastName())
+                .address(adresa)
+                .make(marka)
                 .model(model)
-                .kubikaza(kubikaza)
-                .godiste(godiste)
-                .vrstaPogona(vrstaPogona)
-                .tablice(tablice)
-                .datumIzdavanja(danas)
-                .datumVazenja(danas.plusYears(5))
-                .brojDozvole(UUID.randomUUID().toString())
-                .korisnik(korisnik)
+                .displacement(kubikaza)
+                .manufacturedYear(godiste)
+                .fuelSystem(vrstaPogona)
+                .plateNumber(tablice)
+                .dateOfIssuing(danas)
+                .validUntil(danas.plusYears(5))
+                .drivingLicenseNumber(UUID.randomUUID().toString())
+                .user(korisnik)
                 .status(StatusZahteva.CEKANJE)
                 .build();
     }

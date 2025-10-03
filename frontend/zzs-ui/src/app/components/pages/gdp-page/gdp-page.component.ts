@@ -22,6 +22,13 @@ import {MatOption, MatSelect} from '@angular/material/select';
 import {ChartModule} from 'primeng/chart';
 import {TableModule} from 'primeng/table';
 import {DataTableComponent} from '../../ui/data-table/data-table.component';
+import {UserInfo} from '../../../model/register-user.model';
+import {UsersService} from '../../../services/users/users.service';
+import {AuthService} from '@auth0/auth0-angular';
+import {take} from 'rxjs';
+import {MatIcon} from '@angular/material/icon';
+import {MatIconButton} from '@angular/material/button';
+import {ImportExportService} from '../../../services/import-export.service';
 
 @Component({
   selector: 'app-gdp-page',
@@ -50,10 +57,14 @@ import {DataTableComponent} from '../../ui/data-table/data-table.component';
     NgForOf,
     ChartModule,
     TableModule,
-    DataTableComponent
+    DataTableComponent,
+    MatIcon,
+    MatIconButton
   ],
   templateUrl: './gdp-page.component.html',
-  styleUrl: './gdp-page.component.scss'
+  styleUrl: './gdp-page.component.scss',
+  providers: [UsersService],
+
 })
 export class GdpPageComponent implements OnInit {
    columns  = [
@@ -72,16 +83,28 @@ export class GdpPageComponent implements OnInit {
    regions: Region[] = Object.values(Region);
    selectedRegion: string = 'ALL';
    highlight?: GdpGrowth;
+   userEmail!: string;
 
    trendChartData: any;
    regionComparisonData: any;
    chartOptions: any;
    tableData: GdpStat[] = [];
 
-   constructor(private gdpService: GdpService) {}
+   constructor(private gdpService: GdpService,
+               private userService: UsersService,
+               private auth: AuthService,
+               private csvService: ImportExportService) {
+     this.auth.user$.pipe(
+       take(1)).subscribe(user => {
+       this.userEmail = user?.email as string;
+     })
+   }
 
   ngOnInit() {
-     this.loadData();
+     this.userService.getUserInfo(this.userEmail).subscribe((userInfo) => {
+       this.selectedRegion = userInfo.region;
+       this.loadData();
+     })
   }
 
   loadData(pageIndex = 0, pageSize = 10, sort = 'year,desc') {
@@ -116,11 +139,13 @@ export class GdpPageComponent implements OnInit {
        }]
      };
 
-     this.regionComparisonData = {
+    const latestYear = Math.max(...data.map(d => d.year));
+
+    this.regionComparisonData = {
        labels: [...new Set(data.map(d => RegionUtil.getLabel(d.region)))],
        datasets: [{
-         label: 'BDP 2025',
-         data: data.filter(d => d.year === 2025).map(d => d.gdpBillion),
+         label: `BDP ${latestYear}`,
+         data: data.filter(d => d.year === latestYear).map(d => d.gdpBillion),
          backgroundColor: '#66BB6A'
        }]
      };
@@ -143,6 +168,19 @@ export class GdpPageComponent implements OnInit {
      this.sortField = event.active;
      this.sortDirection = event.direction;
      this.loadData(0, 10, `${this.sortField},${this.sortDirection}`);
+  }
+
+  exportCsv() {
+    this.csvService.exportCsv('GDP').subscribe(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'gdp-data.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    })
   }
 
   protected readonly RegionUtil = RegionUtil;

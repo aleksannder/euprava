@@ -1,8 +1,9 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import {Oruzje, OruzjeService} from "../../services/oruzje.service";
-import {Role} from "../../models/korisnik";
-import {RoleService} from "../../services/role.service";
+
+import {BehaviorSubject, Observable} from "rxjs";
+import {AuthTokenUtil} from "../../interceptor/auth-token.util";
 
 declare var bootstrap: any;
 
@@ -17,36 +18,35 @@ export class OruzjeComponent implements OnInit, AfterViewInit {
   kategorijeOpcije: string[] = ['A', 'B', 'C', 'D', 'E'];
 
   oruzja: Oruzje[] = [];
-  token: string = '';
-  rola: Role = Role.CITIZEN;
-
-  noviZahtev: any = { kategorijaOruzja: [] };
+  isEmployer$!: Observable<boolean>;
+  mozeProduziti$ = new BehaviorSubject<boolean>(false);
+  noviZahtev: any = { gunCategories: [] };
   modalInstance: any;
+  canProduce: boolean = false;
+  userEmail!: string;
 
   showAlert: boolean = false;
   alertMessage: string = '';
   alertType: 'success' | 'error' = 'success';
 
-  constructor(private oruzjeService: OruzjeService, private roleService: RoleService) { }
+  constructor(private oruzjeService: OruzjeService, private authUtil: AuthTokenUtil) {
+    this.isEmployer$ = this.authUtil.hasPermission('mup:employer');
+  }
 
   ngOnInit(): void {
-    this.token = localStorage.getItem('jwtToken') || '';
-    this.roleService.getRoles$().subscribe(roles => {
-      const role = roles[0];
+    this.authUtil.getUserProfile().subscribe((user) => {
+      this.userEmail = user.email;
+      this.ucitajOruzja();
+    })
 
-      switch (role) {
-        case 'EMPLOYER':
-          this.rola = Role.EMPLOYER;
-          break;
-        case 'CITIZEN':
-          this.rola = Role.CITIZEN;
-          break;
-        default:
-          this.rola = Role.CITIZEN;
+    this.isEmployer$.subscribe(isEmployer => {
+      if (!isEmployer) {
+        this.canProduce = this.oruzja.some(o => o.status === 'DOZVOLJEN');
+      } else {
+        this.canProduce = false;
       }
+      this.mozeProduziti$.next(this.canProduce);
     });
-
-    this.ucitajOruzja();
   }
 
   ngAfterViewInit(): void {
@@ -65,15 +65,15 @@ export class OruzjeComponent implements OnInit, AfterViewInit {
     const danasnjiDatum = new Date().toISOString().split('T')[0]; // "YYYY-MM-DD"
 
     const payload = {
-      datumOd: danasnjiDatum,
-      kategorijaOruzja: this.noviZahtev.kategorijaOruzja
+      dateFrom: danasnjiDatum,
+      gunCategories: this.noviZahtev.gunCategories
     };
 
-    this.oruzjeService.podnesiZahtev(payload).subscribe({
+    this.oruzjeService.podnesiZahtev(payload, this.userEmail).subscribe({
       next: res => {
         if (this.modalInstance) this.modalInstance.hide();
         form.resetForm();
-        this.noviZahtev = { kategorijaOruzja: [] };
+        this.noviZahtev = { gunCategories: [] };
         this.ucitajOruzja();
         this.alertType = 'success';
         this.alertMessage = res?.message || 'Zahtev uspešno podnet!';
@@ -88,7 +88,7 @@ export class OruzjeComponent implements OnInit, AfterViewInit {
   }
 
   ucitajOruzja(): void {
-    this.oruzjeService.dohvatiSve().subscribe({
+    this.oruzjeService.dohvatiSve(this.userEmail).subscribe({
       next: res => this.oruzja = res,
       error: err => console.error(err)
     });
@@ -100,10 +100,6 @@ export class OruzjeComponent implements OnInit, AfterViewInit {
 
   get imaAktivanZahtev(): boolean {
     return this.oruzja.some(z => z.status === 'CEKANJE' || z.status === 'DOZVOLJEN');
-  }
-
-  get isEmployer(): boolean {
-    return this.rola === Role.EMPLOYER;
   }
 
   prihvatiZahtev(id: number) {
@@ -155,7 +151,7 @@ export class OruzjeComponent implements OnInit, AfterViewInit {
   }
 
   get mozeProduziti(): boolean {
-    return !this.isEmployer && this.oruzja.some(o => o.status === 'DOZVOLJEN');
+    return this.mozeProduziti$.value;
   }
 
 }

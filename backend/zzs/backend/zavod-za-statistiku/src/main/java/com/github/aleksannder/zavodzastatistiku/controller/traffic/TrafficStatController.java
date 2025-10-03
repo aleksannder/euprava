@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public class TrafficStatController {
 
     private final TrafficStatService service;
 
+    @PreAuthorize("hasAnyRole('ANALYST', 'ADMIN', 'CITIZEN')")
     @GetMapping
     public ResponseEntity<Page<TrafficStat>> getAll(
             @RequestParam(defaultValue = "0") int page,
@@ -33,17 +35,20 @@ public class TrafficStatController {
         return ResponseEntity.ok(service.findAll(pageable));
     }
 
+    @PreAuthorize("hasAnyRole('ANALYST', 'ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<TrafficStat> getById(@PathVariable Long id) {
         TrafficStat stat = service.findById(id);
         return stat == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(stat);
     }
 
+    @PreAuthorize("hasRole('ANALYST')")
     @PostMapping
     public ResponseEntity<TrafficStat> create(@RequestBody TrafficStat stat) {
         return ResponseEntity.ok(service.save(stat));
     }
 
+    @PreAuthorize("hasRole('ANALYST')")
     @PutMapping("/{id}")
     public ResponseEntity<TrafficStat> update(@PathVariable Long id, @RequestBody TrafficStat updated) {
         TrafficStat existing = service.findById(id);
@@ -53,6 +58,7 @@ public class TrafficStatController {
         return ResponseEntity.ok(service.save(updated));
     }
 
+    @PreAuthorize("hasAnyRole('ANALYST', 'ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
@@ -60,22 +66,27 @@ public class TrafficStatController {
     }
 
     // Specific use cases
+
+    @PreAuthorize("hasAnyRole('ANALYST', 'ADMIN', 'CITIZEN')")
     @GetMapping("/trend/{region}")
     public ResponseEntity<List<TrafficStat>> getTrendByRegion(@PathVariable Region region) {
         return ResponseEntity.ok(service.getTrendByRegion(region));
     }
 
+    @PreAuthorize("hasAnyRole('ANALYST', 'ADMIN', 'CITIZEN')")
     @GetMapping("/summary")
     public ResponseEntity<List<TrafficSummaryDto>> getSummaryByYear() {
         return ResponseEntity.ok(service.getSummaryOfVehiclesAndAccidentsByYear());
     }
 
+    @PreAuthorize("hasAnyRole('ANALYST', 'ADMIN', 'CITIZEN')")
     @GetMapping("/dangerous")
     public ResponseEntity<List<DangerousRegionDTO>> getTopDangerousRegions(
             @RequestParam(defaultValue = "2020") int yearFrom) {
         return ResponseEntity.ok(service.getTopDangerousRegions(yearFrom));
     }
 
+    @PreAuthorize("hasAnyRole('ANALYST', 'ADMIN', 'CITIZEN')")
     @GetMapping("/fatalities-trend")
     public ResponseEntity<List<FatalitiesTrendDto>> getFatalitiesTrend() {
         return ResponseEntity.ok(service.getFatalitiesTrend());

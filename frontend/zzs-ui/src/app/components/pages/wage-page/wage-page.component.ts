@@ -13,11 +13,13 @@ import {
   MatTable
 } from '@angular/material/table';
 import {DecimalPipe, JsonPipe, NgIf} from '@angular/common';
-import {MatButton} from '@angular/material/button';
+import {MatButton, MatIconButton} from '@angular/material/button';
 import {ChartModule} from 'primeng/chart';
 import {DataTableComponent} from '../../ui/data-table/data-table.component';
 import { RegionUtil } from '../../../services/util/region.util';
 import {MatTooltip} from '@angular/material/tooltip';
+import {MatIcon} from '@angular/material/icon';
+import {ImportExportService} from '../../../services/import-export.service';
 
 @Component({
   selector: 'app-wage-page',
@@ -40,7 +42,9 @@ import {MatTooltip} from '@angular/material/tooltip';
     MatButton,
     ChartModule,
     DataTableComponent,
-    MatTooltip
+    MatTooltip,
+    MatIconButton,
+    MatIcon
   ],
   templateUrl: './wage-page.component.html',
   styleUrl: './wage-page.component.scss'
@@ -49,20 +53,27 @@ export class WagePageComponent implements OnInit {
   tableData: WageStat[] = [];
   highlight?: WageGrowth;
 
+  totalItems = 0;
+  pageIndex = 0;
+  pageSize = 10;
+  sortField: string = 'year';
+  sortDirection: string = 'desc';
+
   trendChartData: any;
   comparisonChartData: any;
   chartOptions: any;
 
-  constructor(private wageService: WageService) {}
+  constructor(private wageService: WageService, private csvService: ImportExportService) {}
 
   ngOnInit(): void {
     this.loadData();
   }
 
-  loadData(): void {
-    this.wageService.getAll().subscribe(data => {
-      this.tableData = data;
-      this.prepareCharts(data);
+  loadData(pageIndex = 0, pageSize = 10, sort = 'year,desc'): void {
+    this.wageService.getAll(pageIndex, pageSize, sort).subscribe(data => {
+      this.tableData = data.content;
+      this.prepareCharts(data.content);
+      this.totalItems = data.totalElements;
     });
 
     this.wageService.getHighlightByYear(2025).subscribe(data => {
@@ -81,11 +92,13 @@ export class WagePageComponent implements OnInit {
       }]
     };
 
+    const latestYear = Math.max(...data.map(d => d.year));
+
     this.comparisonChartData = {
-      labels: [...new Set(data.filter(d => d.year === 2025).map(d => RegionUtil.getLabel(d.region)))],
+      labels: [...new Set(data.filter(d => d.year === latestYear).map(d => RegionUtil.getLabel(d.region)))],
       datasets: [{
-        label: 'Prosečna plata 2025 (RSD)',
-        data: data.filter(d => d.year === 2025).map(d => d.averageWage),
+        label: `Prosečna plata ${latestYear} (RSD)`,
+        data: data.filter(d => d.year === latestYear).map(d => d.averageWage),
         backgroundColor: '#66BB6A'
       }]
     };
@@ -96,5 +109,29 @@ export class WagePageComponent implements OnInit {
     };
   }
 
+  onPageChange(event: any) {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.loadData(this.pageIndex, this.pageSize);
+  }
+
+  onSortChange(event: any) {
+    this.sortField = event.active;
+    this.sortDirection = event.direction;
+    this.loadData(0, 10, `${this.sortField},${this.sortDirection}`);
+  }
+
+  exportCsv() {
+    this.csvService.exportCsv('WAGE').subscribe(blob => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'wage-data.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    })
+  }
   protected readonly RegionUtil = RegionUtil;
 }

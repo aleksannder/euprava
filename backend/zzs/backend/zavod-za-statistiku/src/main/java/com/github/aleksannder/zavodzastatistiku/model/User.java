@@ -8,7 +8,7 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
-import java.util.Set;
+import java.time.LocalDate;
 
 @Entity
 @AllArgsConstructor
@@ -30,19 +30,26 @@ public class User {
 
     private String lastName;
 
+    private LocalDate dateOfBirth;
+
+    private String city;
+
+    private String address;
+
     @Enumerated(EnumType.STRING)
     @Column(length = 32)
     private Region region;
-    
+
+    private String jmbg;
+
+    private String gender;
+
     @CreationTimestamp
     private Instant createdAt;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "role")
     @Enumerated(EnumType.STRING)
-    private Set<Role> roles;
+    private Role role;
 
-    @Column(name="auth0_user_id", nullable = true)
+    @Column(name="auth0_user_id", nullable = false)
     private String auth0UserId;
 }

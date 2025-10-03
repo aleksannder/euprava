@@ -23,8 +23,33 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Datum rođenja</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="dateOfBirth" required>
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Pol</mat-label>
+      <mat-select formControlName="gender" required>
+        <mat-option value="M">Muški</mat-option>
+        <mat-option value="Ž">Ženski</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Grad</mat-label>
+      <input matInput formControlName="city" required>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Adresa</mat-label>
+      <input matInput formControlName="address" required>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
       <mat-label>Region</mat-label>
-      <mat-select formControlName="region">
+      <mat-select formControlName="region" required>
         <mat-option *ngFor="let region of regions" [value]="region">
           {{ RegionUtil.getLabel(region) }}
         </mat-option>
@@ -36,8 +61,8 @@
     </button>
 
     <span class="redirect-text">
-    Već imate nalog?
-     <a [routerLink]="['/login']">Prijavite se ovde</a>
+      Već imate nalog?
+      <a [routerLink]="['/login']">Prijavite se ovde</a>
     </span>
 
   </form>

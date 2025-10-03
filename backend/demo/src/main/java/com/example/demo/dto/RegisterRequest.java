@@ -1,5 +1,6 @@
 package com.example.demo.dto;
 
+import com.example.demo.model.Region;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,7 @@ public class RegisterRequest {
     private String lozinka;
     private LocalDate datumRodjenja;
     private String grad;
+    private Region region;
     private String adresa;
     private String pol;
 

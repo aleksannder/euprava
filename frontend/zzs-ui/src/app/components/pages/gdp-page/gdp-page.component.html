@@ -21,7 +21,14 @@
     <p-chart type="bar" [data]="regionComparisonData" [options]="chartOptions"></p-chart>
   </div>
 
-  <div class="table">
+  <div class="table-container">
+    <div class="table-header">
+      <h3>Pregled podataka</h3>
+      <button mat-icon-button color="primary" (click)="exportCsv()" matTooltip="Izvezi kao CSV">
+        <mat-icon>download</mat-icon>
+      </button>
+    </div>
+
     <app-data-table
       [columns]="columns"
       [data]="tableData"

@@ -2,7 +2,8 @@ import { Component, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angula
 import { LicnaKarta } from "../../models/LicnaKarta";
 import { ZahteviService } from "../../services/zahtevi.service";
 import {Role} from "../../models/korisnik";
-import {RoleService} from "../../services/role.service";
+import {AuthTokenUtil} from "../../interceptor/auth-token.util";
+import {Observable} from "rxjs";
 
 declare var bootstrap: any;
 
@@ -13,10 +14,9 @@ declare var bootstrap: any;
 })
 export class LicnaComponent implements OnInit, AfterViewInit {
   @ViewChild('zahtevModal', { static: false }) zahtevModalRef!: ElementRef;
-
+  isEmployer$!: Observable<boolean>;
+  userEmail!: string;
   zahtevi: LicnaKarta[] = [];
-  token: string = '';
-  rola: Role = Role.EMPLOYER;
 
   noviZahtev = {
     jmbg: '',
@@ -32,28 +32,16 @@ export class LicnaComponent implements OnInit, AfterViewInit {
   alertMessage: string = '';
   alertType: 'success' | 'error' = 'error';
 
-  constructor(private zahteviService: ZahteviService, private roleService: RoleService) { }
+  constructor(private zahteviService: ZahteviService, private authServiceUtil: AuthTokenUtil) {
+    this.isEmployer$ = authServiceUtil.hasPermission('mup:employer');
+  }
 
   ngOnInit(): void {
-    this.token = localStorage.getItem('jwtToken') || '';
-    //todo
-    this.roleService.getRoles$().subscribe(roles => {
-      const role = roles[0];
 
-      switch (role) {
-        case 'EMPLOYER':
-          this.rola = Role.EMPLOYER;
-          break;
-        case 'CITIZEN':
-          this.rola = Role.CITIZEN;
-          break;
-        default:
-          this.rola = Role.CITIZEN;
-      }
-    });
-
-    this.ucitajZahteve();
-
+    this.authServiceUtil.getUserProfile().subscribe((user) => {
+      this.userEmail = user.email;
+      this.ucitajZahteve();
+    })
     const danas = new Date();
     danas.setDate(danas.getDate() - 1);
     this.today = danas.toISOString().split('T')[0];
@@ -74,7 +62,7 @@ export class LicnaComponent implements OnInit, AfterViewInit {
   }
 
   podnesiZahtev(): void {
-    this.zahteviService.podnesiZahtev(this.token, this.noviZahtev).subscribe({
+    this.zahteviService.podnesiZahtev(this.userEmail, this.noviZahtev).subscribe({
       next: (res) => {
         this.ucitajZahteve();
         this.alertType = 'success';
@@ -90,8 +78,11 @@ export class LicnaComponent implements OnInit, AfterViewInit {
   }
 
   ucitajZahteve(): void {
-    this.zahteviService.getSviZahtevi(this.token).subscribe({
-      next: (data) => this.zahtevi = data,
+    this.zahteviService.getSviZahtevi(this.userEmail).subscribe({
+      next: (data) => {
+        console.info(data);
+        this.zahtevi = data
+      },
       error: (err) => console.error(err)
     });
   }
@@ -104,12 +95,8 @@ export class LicnaComponent implements OnInit, AfterViewInit {
     return this.zahtevi.some(zahtev => zahtev.status === 'CEKANJE' || zahtev.status === 'DOZVOLJEN');
   }
 
-  get isEmployer(): boolean {
-    return this.rola === Role.EMPLOYER;
-  }
-
   prihvatiZahtev(id: number) {
-    this.zahteviService.prihvatiZahtev(this.token, id).subscribe({
+    this.zahteviService.prihvatiZahtev(id).subscribe({
       next: (res: any) => {
         this.ucitajZahteve();
 
@@ -127,7 +114,7 @@ export class LicnaComponent implements OnInit, AfterViewInit {
   }
 
   odbijZahtev(id: number) {
-    this.zahteviService.odbijZahtev(this.token, id).subscribe({
+    this.zahteviService.odbijZahtev(id).subscribe({
       next: (res: any) => {
         this.ucitajZahteve();
         this.alertMessage = res?.message || 'Zahtev je odbijen!';
@@ -148,7 +135,7 @@ export class LicnaComponent implements OnInit, AfterViewInit {
   }
 
   produziLicnuKartu() {
-    this.zahteviService.produziLicnu(this.token).subscribe({
+    this.zahteviService.produziLicnu(this.userEmail).subscribe({
       next: (res: string) => {
         this.alertType = 'success';
         this.alertMessage = res || 'Lična karta je produžena!';

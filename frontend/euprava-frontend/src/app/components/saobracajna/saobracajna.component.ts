@@ -3,6 +3,8 @@ import { SaobracajnaDozvola, SaobracajnaService } from '../../services/saobracaj
 import { NgForm } from '@angular/forms';
 import {Role} from "../../models/korisnik";
 import {RoleService} from "../../services/role.service";
+import {Observable} from "rxjs";
+import {AuthTokenUtil} from "../../interceptor/auth-token.util";
 
 declare var bootstrap: any;
 interface NoviZahtev {
@@ -23,10 +25,8 @@ export class SaobracajnaComponent implements OnInit, AfterViewInit {
   @ViewChild('saobracajnaModal', { static: false }) saobracajnaModalRef!: ElementRef;
 
   saobracajne: SaobracajnaDozvola[] = [];
-  token: string = '';
-  rola: Role = Role.EMPLOYER;
   trenutnaGodina: number = new Date().getFullYear();
-
+  isEmployer$!: Observable<boolean>;
   noviZahtev: NoviZahtev = {
     marka: '',
     model: '',
@@ -36,31 +36,20 @@ export class SaobracajnaComponent implements OnInit, AfterViewInit {
     tablice: ''
   };
   modalInstance: any;
-
+  userEmail!: string;
   showAlert: boolean = false;
   alertMessage: string = '';
   alertType: 'success' | 'error' = 'success';
 
-  constructor(private saobracajnaService: SaobracajnaService, private roleService: RoleService) { }
+  constructor(private saobracajnaService: SaobracajnaService, private authUtil: AuthTokenUtil) {
+    this.isEmployer$ = this.authUtil.hasPermission('mup:employer');
+  }
 
   ngOnInit(): void {
-    this.token = localStorage.getItem('jwtToken') || '';
-    this.roleService.getRoles$().subscribe(roles => {
-      const role = roles[0];
-
-      switch (role) {
-        case 'CITIZEN':
-          this.rola = Role.CITIZEN;
-          break;
-        case 'EMPLOYER':
-          this.rola = Role.EMPLOYER;
-          break;
-        default:
-          this.rola = Role.CITIZEN;
-      }
-    });
-
-    this.ucitajSaobracajne();
+    this.authUtil.getUserProfile().subscribe((user) => {
+      this.userEmail = user.email;
+      this.ucitajSaobracajne(this.userEmail);
+    })
   }
 
   ngAfterViewInit(): void {
@@ -76,11 +65,11 @@ export class SaobracajnaComponent implements OnInit, AfterViewInit {
   podnesiZahtev(form: NgForm): void {
     if (form.invalid) return;
 
-    this.saobracajnaService.podnesiZahtev(this.noviZahtev).subscribe({
+    this.saobracajnaService.podnesiZahtev(this.noviZahtev, this.userEmail).subscribe({
       next: res => {
         if (this.modalInstance) this.modalInstance.hide();
         form.resetForm();
-        this.ucitajSaobracajne();
+        this.ucitajSaobracajne(this.userEmail);
 
         this.alertType = 'success';
         this.alertMessage = res || 'Zahtev uspešno podnet!';
@@ -96,8 +85,8 @@ export class SaobracajnaComponent implements OnInit, AfterViewInit {
 
   }
 
-  ucitajSaobracajne(): void {
-    this.saobracajnaService.dohvatiSve().subscribe({
+  ucitajSaobracajne(email: string): void {
+    this.saobracajnaService.dohvatiSve(email).subscribe({
       next: (res) => this.saobracajne = res,
       error: (err) => console.error(err)
     });
@@ -111,14 +100,10 @@ export class SaobracajnaComponent implements OnInit, AfterViewInit {
     return this.saobracajne.some(z => z.status === 'CEKANJE' || z.status === 'DOZVOLJEN');
   }
 
-  get isEmployer(): boolean {
-    return this.rola === Role.EMPLOYER;
-  }
-
   prihvatiZahtev(id: number) {
     this.saobracajnaService.odobriZahtev(id).subscribe({
       next: res => {
-        this.ucitajSaobracajne();
+        this.ucitajSaobracajne(this.userEmail);
         this.alertMessage = res?.message || 'Zahtev odobren!';
         this.alertType = 'success';
         this.showAlert = true;
@@ -134,7 +119,7 @@ export class SaobracajnaComponent implements OnInit, AfterViewInit {
   odbijZahtev(id: number) {
     this.saobracajnaService.odbijZahtev(id).subscribe({
       next: res => {
-        this.ucitajSaobracajne();
+        this.ucitajSaobracajne(this.userEmail);
         this.alertMessage = res?.message || 'Zahtev odbijen!';
         this.alertType = 'success';
         this.showAlert = true;
@@ -148,9 +133,9 @@ export class SaobracajnaComponent implements OnInit, AfterViewInit {
   }
 
   produziSaobracajnu() {
-    this.saobracajnaService.produzi().subscribe({
+    this.saobracajnaService.produzi(this.userEmail).subscribe({
       next: (res: any) => {
-        this.ucitajSaobracajne();
+        this.ucitajSaobracajne(this.userEmail);
         this.alertType = 'success';
         this.alertMessage = res?.message || 'Saobraćajna je produžena!';
         this.showAlert = true;

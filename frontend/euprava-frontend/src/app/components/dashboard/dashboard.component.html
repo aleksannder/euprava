@@ -48,7 +48,7 @@
     </div>
   </a>
 
-  <a routerLink="/ostalo" class="card-link" *ngIf="!isEmployer">
+  <a routerLink="/ostalo" class="card-link" *ngIf="!(isEmployer$ | async)">
     <div class="card">
       <h2>Ostalo</h2>
       <ul>

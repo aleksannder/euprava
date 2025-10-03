@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public class GdpStatController {
 
     private final GdpStatService service;
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST', 'CITIZEN')")
     @GetMapping
     public ResponseEntity<Page<GdpStat>> getAll(@RequestParam(defaultValue = "0") int page,
                                                 @RequestParam(defaultValue = "10") int size,
@@ -30,17 +32,20 @@ public class GdpStatController {
         return ResponseEntity.ok(service.findAll(pageable));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST')")
     @GetMapping("/{id}")
     public ResponseEntity<GdpStat> getById(@PathVariable Long id) {
         GdpStat stat = service.findById(id);
         return stat == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(stat);
     }
 
+    @PreAuthorize("hasAnyRole('ANALYST')")
     @PostMapping
     public ResponseEntity<GdpStat> create(@RequestBody GdpStat stat) {
         return ResponseEntity.ok(service.save(stat));
     }
 
+    @PreAuthorize("hasAnyRole('ANALYST')")
     @PutMapping("/{id}")
     public ResponseEntity<GdpStat> update(@PathVariable Long id, @RequestBody GdpStat updated) {
         GdpStat existing = service.findById(id);
@@ -50,27 +55,32 @@ public class GdpStatController {
         return ResponseEntity.ok(service.save(updated));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST', 'CITIZEN')")
     @GetMapping("/trend")
     public ResponseEntity<List<GdpStat>> getTrend() {
         return ResponseEntity.ok(service.getTrend());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST', 'CITIZEN')")
     @GetMapping("/cpi")
     public ResponseEntity<List<GdpStat>> getCpi() {
         return ResponseEntity.ok(service.getCpi());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST', 'CITIZEN')")
     @GetMapping("/growth/{year}/{region}")
     public ResponseEntity<GdpGrowthHighlight> getHighlight(@PathVariable Integer year, @PathVariable Region region) {
         return ResponseEntity.ok(service.gdpGrowthFromLastYear(year, region));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'ANALYST', 'CITIZEN')")
     @GetMapping("/region/{region}")
     public ResponseEntity<Page<GdpStat>> getAllStatsForRegion(@PathVariable Region region,
                                                               @RequestParam(defaultValue = "0") int page,

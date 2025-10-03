@@ -95,6 +95,19 @@
                     </div>
                   </div>
 
+                  <div class="mb-2">
+                    <label for="region" class="form-label">Region</label>
+                    <select id="region" class="form-select form-select-sm" formControlName="region">
+                      <option value="" disabled selected>Izaberite region</option>
+                      <option *ngFor="let r of regions" [value]="r">
+                        {{ RegionUtil.getLabel(r) }}
+                      </option>
+                    </select>
+                    <div class="text-danger mt-1" *ngIf="region?.touched && region?.hasError('required')">
+                      Region je obavezan.
+                    </div>
+                  </div>
+
                   <button type="submit" class="btn btn-dark w-100 mb-2" [disabled]="!registerForm.valid">
                     Registracija
                   </button>

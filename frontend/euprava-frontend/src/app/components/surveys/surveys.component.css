@@ -1,0 +1,21 @@
+.survey-page {
+  padding: 2rem;
+  text-align: center;
+}
+
+.page-title {
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+
+  &:hover {
+    cursor: pointer;
+  }
+}

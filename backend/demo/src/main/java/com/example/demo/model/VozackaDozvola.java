@@ -12,28 +12,29 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "driving_licenses")
 public class VozackaDozvola {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String ime;
-    private String prezime;
-    private LocalDate datumRodjenja;
-    private LocalDate datumIzdavanja;
-    private LocalDate datumVazenja;
-    private String grad;
+    private String firstName;
+    private String lastName;
+    private LocalDate dateOfBirth;
+    private LocalDate dateOfIssuing;
+    private LocalDate validUntil;
+    private String city;
 
     @Column(unique = true, nullable = false)
-    private String brojDozvole;
+    private String licenseNumber;
 
-    @ElementCollection
-    private List<String> kategorije;
+    @ElementCollection()
+    private List<String> categories;
 
     @ManyToOne
-    @JoinColumn(name = "korisnik_id", nullable = false)
-    private Korisnik korisnik;
+    @JoinColumn(name = "user_id", nullable = false)
+    private Korisnik user;
 
     @Enumerated(EnumType.STRING)
     private StatusZahteva status;
@@ -42,15 +43,15 @@ public class VozackaDozvola {
         LocalDate danas = LocalDate.now();
 
         return VozackaDozvola.builder()
-                .ime(korisnik.getIme())
-                .prezime(korisnik.getPrezime())
-                .datumRodjenja(korisnik.getDatumRodjenja())
-                .grad(grad)
-                .datumIzdavanja(danas)
-                .datumVazenja(danas.plusYears(10))
-                .brojDozvole(UUID.randomUUID().toString())
-                .kategorije(kategorije)
-                .korisnik(korisnik)
+                .firstName(korisnik.getFirstName())
+                .lastName(korisnik.getLastName())
+                .dateOfBirth(korisnik.getDateOfBirth())
+                .city(grad)
+                .dateOfIssuing(danas)
+                .validUntil(danas.plusYears(10))
+                .licenseNumber(UUID.randomUUID().toString())
+                .categories(kategorije)
+                .user(korisnik)
                 .status(StatusZahteva.CEKANJE)
                 .build();
     }

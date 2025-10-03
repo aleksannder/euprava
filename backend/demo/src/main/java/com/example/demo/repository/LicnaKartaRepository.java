@@ -9,10 +9,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface LicnaKartaRepository extends JpaRepository<LicnaKarta, Long> {
-    Optional<LicnaKarta> findByKorisnik(Korisnik korisnik);
+    Optional<LicnaKarta> findByUser(Korisnik korisnik);
 
-    Optional<LicnaKarta> findByKorisnikAndStatus(Korisnik korisnik, StatusZahteva status);
+    Optional<LicnaKarta> findByUserAndStatus(Korisnik korisnik, StatusZahteva status);
 
-    List<LicnaKarta> findAllByKorisnik(Korisnik korisnik);
+    List<LicnaKarta> findAllByUser(Korisnik korisnik);
 
+    Long countIdentityCardByStatusEquals(StatusZahteva status);
 }

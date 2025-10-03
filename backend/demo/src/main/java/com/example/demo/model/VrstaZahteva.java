@@ -8,7 +8,7 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
+@Table(name = "request_type")
 public abstract class VrstaZahteva {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

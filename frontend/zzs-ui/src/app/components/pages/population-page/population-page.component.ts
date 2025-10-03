@@ -21,6 +21,11 @@ import {FormsModule} from '@angular/forms';
 import {ChartModule} from 'primeng/chart';
 import {MatTooltip} from '@angular/material/tooltip';
 import {MatLabel} from '@angular/material/form-field';
+import {User} from '@auth0/auth0-spa-js';
+import {UsersService} from '../../../services/users/users.service';
+import {AuthService} from '@auth0/auth0-angular';
+import {MatIcon} from '@angular/material/icon';
+import {ImportExportService} from '../../../services/import-export.service';
 
 @Component({
   selector: 'app-population-page',
@@ -34,6 +39,7 @@ import {MatLabel} from '@angular/material/form-field';
     MatColumnDef,
     MatHeaderCellDef,
     MatHeaderCell,
+    MatIcon,
     MatCell,
     MatCellDef,
     DecimalPipe,
@@ -51,7 +57,8 @@ import {MatLabel} from '@angular/material/form-field';
     MatTooltip
   ],
   templateUrl: './population-page.component.html',
-  styleUrl: './population-page.component.scss'
+  styleUrl: './population-page.component.scss',
+  providers: [UsersService]
 })
 export class PopulationPageComponent implements OnInit {
   regions: Region[] = Object.values(Region);
@@ -66,14 +73,25 @@ export class PopulationPageComponent implements OnInit {
 
   highlightExtremes: any;
   projectionData: any;
+  userEmail!:string;
 
-  constructor(private populationService: PopulationService) {}
+  constructor(private populationService: PopulationService,
+              private usersService: UsersService,
+              private auth: AuthService,
+              private csvService: ImportExportService) {
+    this.auth.user$.subscribe(user => {
+      this.userEmail = user?.email!;
+    })
+  }
 
     ngOnInit(): void {
-        this.loadData();
+        this.usersService.getUserInfo(this.userEmail).subscribe((userInfo) => {
+          this.selectedRegion = userInfo.region;
+          this.loadData();
+        })
     }
 
-    loadData(): void {
+    loadData(page = 0, size = 10, sort = 'year,desc'): void {
     this.populationService.getPopulationTrendForRegion(this.selectedRegion as Region).subscribe(data => {
       this.trendData = {
         labels: data.map(d => d.year),
@@ -123,13 +141,27 @@ export class PopulationPageComponent implements OnInit {
       this.shareData = {
         labels:  [...new Set(data.map(d => RegionUtil.getLabel(d.region)))],
         datasets: [
-          { data: data.map(d => d.value), backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#EF5350']}
+          { data: data.map(d => d.value), backgroundColor: ['#42A5F5', '#66BB6A', '#FFA726', '#EF5350', '#A865C9']}
         ]
       };
     });
 
     this.chartOptions = { responsive: true, plugins: { legend: { display: true } } };
     }
+
+    exportCsv() {
+      this.csvService.exportCsv('POP').subscribe(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'population-data.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      })
+    }
+
 
   protected readonly RegionUtil = RegionUtil;
 }

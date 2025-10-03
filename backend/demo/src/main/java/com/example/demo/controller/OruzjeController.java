@@ -1,10 +1,11 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.OruzjeRequest;
+import com.example.demo.model.Korisnik;
 import com.example.demo.model.Oruzje;
-import com.example.demo.model.Role;
-import com.example.demo.security.JwtService;
+import com.example.demo.repository.KorisnikRepository;
 import com.example.demo.service.OruzjeService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -15,26 +16,20 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/oruzje")
+@RequiredArgsConstructor
 public class OruzjeController {
 
     private final OruzjeService service;
-    private final JwtService jwtService;
+    private final KorisnikRepository korisnikRepository;
 
-    public OruzjeController(OruzjeService service,JwtService jwtService) {
-        this.service = service;
-        this.jwtService = jwtService;
-    }
 
-    @PostMapping("/zahtev")
+    @PostMapping("/zahtev/{authHeader}")
     @PreAuthorize("hasRole('CITIZEN')")
     public ResponseEntity<Map<String, String>> podnesiZahtev(@RequestBody OruzjeRequest request,
-                                                             @RequestHeader("Authorization") String authHeader) {
+                                                             @PathVariable String authHeader) {
         Map<String, String> response = new HashMap<>();
         try {
-            String token = authHeader.substring(7);
-            String email = jwtService.extractEmail(token);
-
-            Oruzje o = service.podnesiZahtev(email, request);
+            Oruzje o = service.podnesiZahtev(authHeader, request);
 
             response.put("message", "Zahtev uspešno podnet!");
             return ResponseEntity.ok(response);
@@ -48,14 +43,16 @@ public class OruzjeController {
         }
     }
 
-    @GetMapping("/svi-zahtevi")
+    @GetMapping("/svi-zahtevi/{authHeader}")
     @PreAuthorize("hasAnyRole('CITIZEN','EMPLOYER')")
-    public ResponseEntity<List<Oruzje>> sviZahtevi(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.substring(7);
-        String email = jwtService.extractEmail(token);
-        Role role = jwtService.extractRole(token);
+    public ResponseEntity<List<Oruzje>> sviZahtevi(@PathVariable String authHeader) {
+        Korisnik u = korisnikRepository.findByEmail(authHeader).orElse(null);
 
-        List<Oruzje> zahtevi = service.sviZahteviPoKorisnikuIliSvi(role, email);
+        if (u == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<Oruzje> zahtevi = service.sviZahteviPoKorisnikuIliSvi(u.getRole(), u.getEmail());
         return ResponseEntity.ok(zahtevi);
     }
 

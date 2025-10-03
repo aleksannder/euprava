@@ -12,6 +12,7 @@ import {MatButton} from '@angular/material/button';
 import {SurveyDomainUtil} from '../../../services/util/domain.util';
 import {MatRadioButton, MatRadioGroup} from '@angular/material/radio';
 import {RegionUtil} from '../../../services/util/region.util';
+import {AuthTokenUtil} from '../../../services/auth/auth-token.util';
 
 @Component({
   selector: 'app-survey-fill-page',
@@ -37,25 +38,29 @@ export class SurveyFillPageComponent implements OnInit {
     surveyForm!: FormGroup;
     hasResponded = false;
     regions: Region[] = Object.values(Region);
+    userEmail!: string;
 
   constructor(
     private route: ActivatedRoute,
     private fb: FormBuilder,
     private surveyService: SurveyService,
-    private router: Router
+    private router: Router,
+    private auth: AuthTokenUtil
   ) {}
 
     ngOnInit(): void {
       const surveyId = Number(this.route.snapshot.paramMap.get('id'));
       if (!surveyId) return;
 
-      const userEmail = localStorage.getItem('userEmail') || 'anonymous@test.com'; // dev fallback
-      this.surveyService.hasUserResponded(surveyId, userEmail).subscribe(already => {
-        this.hasResponded = already;
-        if (!already) {
-          this.loadSurvey(surveyId);
-        }
-      });
+       this.auth.getUserProfile().subscribe((user) => {
+         this.userEmail = user.email;
+         this.surveyService.hasUserResponded(surveyId, this.userEmail).subscribe(already => {
+           this.hasResponded = already;
+           if (!already) {
+             this.loadSurvey(surveyId);
+           }
+         });
+       })
     }
 
   loadSurvey(surveyId: number) {
@@ -75,9 +80,9 @@ export class SurveyFillPageComponent implements OnInit {
   onSubmit(): void {
     if (!this.survey || this.surveyForm.invalid) return;
 
-    const userEmail = localStorage.getItem('userEmail') || 'anonymous@test.com';
+
     const responses: SurveyResponse[] = this.survey.questions.map((q: SurveyQuestion) => ({
-      userEmail: userEmail,
+      userEmail: this.userEmail,
       region: this.surveyForm.value['region'] as Region,
       survey: this.survey!,
       question: q,

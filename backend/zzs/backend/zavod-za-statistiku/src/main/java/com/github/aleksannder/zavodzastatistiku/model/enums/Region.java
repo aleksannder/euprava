@@ -1,5 +1,8 @@
 package com.github.aleksannder.zavodzastatistiku.model.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum Region {
     RS11_BELGRADE("Beogradski region"),
     RS12_VOJVODINA("Region Vojvodine"),
@@ -11,10 +14,6 @@ public enum Region {
 
     Region(String label) {
         this.label = label;
-    }
-
-    public String getLabel() {
-        return label;
     }
 
 }

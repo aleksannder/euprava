@@ -2,9 +2,9 @@ import { Component } from '@angular/core';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatCard, MatCardContent, MatCardHeader, MatCardTitle} from '@angular/material/card';
-import {MatError, MatFormField, MatLabel} from '@angular/material/form-field';
+import {MatError, MatFormField, MatFormFieldModule, MatLabel} from '@angular/material/form-field';
 import {MatIcon} from '@angular/material/icon';
-import {MatInput} from '@angular/material/input';
+import {MatInput, MatInputModule} from '@angular/material/input';
 import {NgForOf, NgIf} from '@angular/common';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {UsersService} from '../../../services/users/users.service';
@@ -12,9 +12,15 @@ import {AuthService} from '@auth0/auth0-angular';
 import {RouterLink} from '@angular/router';
 import {Region} from '../../../model/enums/region.enum';
 import {RegisterUserRequest} from '../../../model/register-user.model';
-import {MatOption} from '@angular/material/core';
+import {MatNativeDateModule, MatOption, provideNativeDateAdapter} from '@angular/material/core';
 import {MatSelect} from '@angular/material/select';
 import {RegionUtil} from '../../../services/util/region.util';
+import {
+  MatDatepicker,
+  MatDatepickerInput,
+  MatDatepickerModule,
+  MatDatepickerToggle
+} from '@angular/material/datepicker';
 
 @Component({
   selector: 'app-register-page',
@@ -30,18 +36,25 @@ import {RegionUtil} from '../../../services/util/region.util';
     MatFormField,
     MatIcon,
     MatIconButton,
+    MatDatepicker,
     MatInput,
     MatLabel,
     NgIf,
     ReactiveFormsModule,
     RouterLink,
+    MatFormFieldModule,
+    MatInputModule,
+    MatDatepickerModule,
     MatOption,
     NgForOf,
-    MatSelect
+    MatSelect,
+    MatDatepickerInput,
+    MatDatepickerToggle,
+    MatNativeDateModule,
   ],
   templateUrl: './register-page.component.html',
   styleUrl: './register-page.component.scss',
-  providers: [UsersService, AuthService]
+  providers: [UsersService, AuthService, provideNativeDateAdapter()],
 })
 export class RegisterPageComponent {
   registerForm: FormGroup;
@@ -56,7 +69,11 @@ export class RegisterPageComponent {
       firstName: ['', [Validators.required]],
       lastName: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(8)]],
-      region: [Region.RS11_BELGRADE, [Validators.required]]
+      region: [Region.RS11_BELGRADE, [Validators.required]],
+      city: ['', Validators.required],
+      address: ['', Validators.required],
+      gender: ['', Validators.required],
+      dateOfBirth: ['', Validators.required],
     });
   }
 

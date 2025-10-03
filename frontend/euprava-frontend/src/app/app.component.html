@@ -10,7 +10,9 @@
       <a class="nav-link main-link" id="doc-link" (click)="goToVozacka()">Vozačka</a>
       <a class="nav-link main-link" id="doc-link" (click)="goToSaobracajna()">Saobraćajna</a>
       <a class="nav-link main-link" id="doc-link" (click)="goToOruzje()">Oružje</a>
-      <a class="nav-link main-link" id="doc-link" (click)="goToOstalo()" *ngIf="!isEmployer">Ostalo</a>
+      <a class="nav-link main-link" id="doc-link" (click)="goToOstalo()" *ngIf="!(isEmployer$ | async)">Ostalo</a>
+      <a class="nav-link main-link" id="doc-link" (click)="goToSurveys()" *ngIf="!(isEmployer$ | async)">Ankete</a>
+
     </div>
 
     <div class="position-relative">

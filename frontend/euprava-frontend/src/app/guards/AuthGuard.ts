@@ -1,38 +1,47 @@
 import {CanActivateFn, Router} from "@angular/router";
+import {AuthTokenUtil} from "../interceptor/auth-token.util";
 import {inject} from "@angular/core";
-import {AuthService} from "@auth0/auth0-angular";
 import {map} from "rxjs";
 
-
-export const authGuard: CanActivateFn = (route, state) => {
-  const auth = inject(AuthService);
-  const router = inject(Router);
-
-  return auth.isAuthenticated$.pipe(
-    map(isAuthenticated => {
-      if (!isAuthenticated) {
-        router.navigate(['/login'])
-        return false;
-      }
-      return true;
-    })
-  );
-};
-
-export function roleGuard(allowedRoles: string[]): CanActivateFn {
-  const auth = inject(AuthService);
-  const router = inject(Router);
+export function roleGuard(requiredRole: string): CanActivateFn {
   return (route, state) => {
-    return auth.user$.pipe(
-      map(user => {
-        const roles: string[] = user?.['https://egov.local/roles'] || [];
-        const hasRole = roles.some(r => allowedRoles.includes(r));
+    const authTokenUtil = inject(AuthTokenUtil);
+    const router = inject(Router);
 
-        if (hasRole) return true;
-
-        router.navigate(['/custom-alert']);
-        return false;
+    return authTokenUtil.hasPermission(requiredRole).pipe(
+      map(hasRole => {
+        if (!hasRole) {
+          console.log(hasRole);
+          router.navigate(['/unauthorized']);
+          return false;
+        }
+        return true;
       })
     );
   };
 }
+
+export const citizenGuard = roleGuard('citizen:access');
+
+export const employerGuard = roleGuard('mup:employer');
+
+export const authGuard: CanActivateFn = (route, state) => {
+  const auth = inject(AuthTokenUtil);
+  const router = inject(Router);
+
+  auth.getDecodedToken().subscribe((data) => {
+    console.log(data);
+    }
+  );
+
+  return auth.isAuthenticated().pipe(
+    map(isAuth => {
+      if (!isAuth) {
+        router.navigate(['/login']);
+        return false;
+      }
+
+      return true;
+    })
+  );
+};

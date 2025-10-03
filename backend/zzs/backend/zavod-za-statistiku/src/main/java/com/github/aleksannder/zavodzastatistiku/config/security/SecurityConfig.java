@@ -1,15 +1,16 @@
 package com.github.aleksannder.zavodzastatistiku.config.security;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -21,11 +22,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Supplier;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
-import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
 
+@Slf4j
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -44,35 +44,32 @@ public class SecurityConfig {
                 .cors(cors -> {})
                 .sessionManagement(sm -> sm.sessionCreationPolicy(STATELESS))
                 .authorizeHttpRequests(reg -> reg
-//                        .requestMatchers("/api/public/**", "/api/auth/**").permitAll()
-//                        .requestMatchers("/api/citizen/**").hasAnyRole("CITIZEN", "ANALYST", "ADMIN")
-//                        .requestMatchers("/api/analyst/**").hasAnyRole("ANALYST", "ADMIN")
-//                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-//                        .anyRequest().authenticated()
-                                .anyRequest().permitAll()
+                        .requestMatchers("/api/public/**", "/api/auth/**").permitAll()
+                        .anyRequest().authenticated()
                 )
-                .oauth2ResourceServer(AbstractHttpConfigurer::disable);
-//                .oauth2ResourceServer(oauth2 -> oauth2.jwt(
-//                        jwt -> jwt.jwtAuthenticationConverter(permissionsToAuthorities()))
-//                );
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(
+                        jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                );
         return http.build();
     }
 
     @Bean
-    Converter<Jwt, ? extends AbstractAuthenticationToken> permissionsToAuthorities() {
-        return jwt -> {
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtAuthenticationConverter conv = new JwtAuthenticationConverter();
+        conv.setJwtGrantedAuthoritiesConverter(jwt -> {
             var auths = new ArrayList<GrantedAuthority>();
             var perms = (Collection<String>) jwt.getClaims().getOrDefault("permissions", List.of());
-
+            log.debug("permissions: {}", perms);
             for (String p : perms) {
                 switch (p) {
                     case "citizen:access"  -> auths.add(new SimpleGrantedAuthority("ROLE_CITIZEN"));
-                    case "zzs:analyst" -> auths.add(new SimpleGrantedAuthority("ROLE_EMPLOYEE"));
+                    case "zzs:analyst"    -> auths.add(new SimpleGrantedAuthority("ROLE_ANALYST"));
                     case "zzs:admin" -> auths.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
                 }
             }
-            return new JwtAuthenticationToken(jwt, auths, jwt.getSubject());
-        };
+            return auths;
+        });
+        return conv;
     }
 
     @Bean

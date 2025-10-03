@@ -3,6 +3,8 @@ import { VozackaDozvola, VozackaService } from '../../services/vozacka.service';
 import { NgForm } from '@angular/forms';
 import {Role} from "../../models/korisnik";
 import {RoleService} from "../../services/role.service";
+import {AuthTokenUtil} from "../../interceptor/auth-token.util";
+import {Observable} from "rxjs";
 
 declare var bootstrap: any;
 
@@ -16,35 +18,28 @@ export class VozackaComponent implements OnInit, AfterViewInit {
   @ViewChild('vozackaModal', { static: false }) vozackaModalRef!: ElementRef;
 
   vozacke: VozackaDozvola[] = [];
-  token: string = '';
-  rola: Role = Role.CITIZEN;
-
+  userEmail!: string;
   noviZahtev = { grad: '', kategorijeStr: '' };
   modalInstance: any;
+  isEmployer$!: Observable<boolean>;
 
   showAlert: boolean = false;
   alertMessage: string = '';
   alertType: 'success' | 'error' = 'success';
 
-  constructor(private vozackaService: VozackaService, private roleService: RoleService) { }
+  constructor(private vozackaService: VozackaService, private userAuthUtil: AuthTokenUtil) {
+    this.userAuthUtil.getUserProfile().subscribe((user) => {
+      this.userEmail = user.email;
+    })
+    this.isEmployer$ = this.userAuthUtil.hasPermission('mup:employer');
+  }
 
   ngOnInit(): void {
-    this.roleService.getRoles$().subscribe(roles => {
-      const role = roles[0];
-
-      switch (role) {
-        case 'CITIZEN':
-          this.rola = Role.CITIZEN;
-          break;
-        case 'EMPLOYER':
-          this.rola = Role.EMPLOYER;
-          break;
-        default:
-          this.rola = Role.CITIZEN;
-      }
-    });
-
-    this.ucitajVozacke();
+    this.isEmployer$ = this.userAuthUtil.hasPermission('mup:employer');
+    this.userAuthUtil.getUserProfile().subscribe((data) => {
+      this.userEmail = data.email;
+      this.ucitajVozacke(this.userEmail);
+    })
   }
 
   ngAfterViewInit(): void {
@@ -64,11 +59,11 @@ export class VozackaComponent implements OnInit, AfterViewInit {
     const kategorije = this.noviZahtev.kategorijeStr.split(',').map(k => k.trim());
     const payload = { kategorije };
 
-    this.vozackaService.podnesiZahtev(payload).subscribe({
+    this.vozackaService.podnesiZahtev(payload, this.userEmail).subscribe({
       next: res => {
         if (this.modalInstance) this.modalInstance.hide();
         form.resetForm();
-        this.ucitajVozacke();
+        this.ucitajVozacke(this.userEmail);
         this.alertType = 'success';
         this.alertMessage = typeof res === 'string' ? res : 'Zahtev uspešno podnet!';
         this.showAlert = true;
@@ -85,8 +80,8 @@ export class VozackaComponent implements OnInit, AfterViewInit {
   }
 
 
-  ucitajVozacke(): void {
-    this.vozackaService.dohvatiSve().subscribe({
+  ucitajVozacke(userEmail: string): void {
+    this.vozackaService.dohvatiSve(userEmail).subscribe({
       next: (res) => this.vozacke = res,
       error: (err) => console.error(err)
     });
@@ -100,14 +95,10 @@ export class VozackaComponent implements OnInit, AfterViewInit {
     return this.vozacke.some(z => z.status === 'CEKANJE' || z.status === 'DOZVOLJEN');
   }
 
-  get isEmployer(): boolean {
-    return this.rola === Role.EMPLOYER;
-  }
-
   prihvatiZahtev(id: number) {
     this.vozackaService.odobriZahtev(id).subscribe({
       next: res => {
-        this.ucitajVozacke();
+        this.ucitajVozacke(this.userEmail);
         this.alertMessage = res?.message || 'Zahtev je odobren!';
         this.alertType = 'success';
         this.showAlert = true;
@@ -124,9 +115,9 @@ export class VozackaComponent implements OnInit, AfterViewInit {
   odbijZahtev(id: number) {
     this.vozackaService.odbijZahtev(id).subscribe({
       next: (res: any) => {
-        this.ucitajVozacke();
+        this.ucitajVozacke(this.userEmail);
         this.alertType = 'success';
-        this.alertMessage = typeof res === 'string' ? res : 'Vozačka je produžena!';
+        this.alertMessage = typeof res === 'string' ? res : 'Zahtev je odbijen!';
         this.showAlert = true;
       },
 
@@ -140,9 +131,9 @@ export class VozackaComponent implements OnInit, AfterViewInit {
   }
 
   produziVozacku() {
-    this.vozackaService.produzi().subscribe({
+    this.vozackaService.produzi(this.userEmail).subscribe({
       next: (res: any) => {
-        this.ucitajVozacke();
+        this.ucitajVozacke(this.userEmail);
         this.alertType = 'success';
         this.alertMessage = res?.message || 'Vozačka je produžena!';
         this.showAlert = true;

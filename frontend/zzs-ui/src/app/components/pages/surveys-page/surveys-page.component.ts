@@ -5,12 +5,14 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {MatCard, MatCardSubtitle, MatCardTitle} from '@angular/material/card';
 import {MatFormField} from '@angular/material/form-field';
 import {MatInput} from '@angular/material/input';
-import {NgForOf, NgIf} from '@angular/common';
+import {AsyncPipe, NgForOf, NgIf} from '@angular/common';
 import {MatButton} from '@angular/material/button';
 import {MatOption, MatSelect} from '@angular/material/select';
 import {SurveyDomainUtil} from '../../../services/util/domain.util';
 import {Router} from '@angular/router';
 import {MatTooltip} from '@angular/material/tooltip';
+import {Observable} from 'rxjs';
+import {AuthTokenUtil} from '../../../services/auth/auth-token.util';
 
 @Component({
   selector: 'app-surveys-page',
@@ -27,23 +29,28 @@ import {MatTooltip} from '@angular/material/tooltip';
     MatCardTitle,
     MatCardSubtitle,
     NgForOf,
-    MatTooltip
+    MatTooltip,
+    AsyncPipe
   ],
   templateUrl: './surveys-page.component.html',
   styleUrl: './surveys-page.component.scss'
 })
 export class SurveysPageComponent implements OnInit {
   surveys: SurveyWithStatus[] = [];
+  isAnalyst$!: Observable<boolean>;
 
-  constructor(private surveyService: SurveyService, private router: Router) {}
+  constructor(private surveyService: SurveyService, private router: Router, private authUserUtil: AuthTokenUtil) {
+    this.isAnalyst$ = authUserUtil.hasPermission('zzs:analyst');
+  }
 
   ngOnInit() {
     this.loadSurveys();
   }
 
   loadSurveys() {
-    const userEmail = localStorage.getItem('userEmail') || 'anonymous@test.com';
-    this.surveyService.getSurveysWithStatus(userEmail).subscribe(data => this.surveys = data);
+    this.authUserUtil.getUserProfile().subscribe((user) => {
+      this.surveyService.getSurveysWithStatus(user.email).subscribe(data => this.surveys = data);
+    })
   }
 
   closeSurvey(id: number) {

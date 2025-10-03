@@ -14,6 +14,9 @@ import {MatOption, MatSelect} from '@angular/material/select';
 import {FormsModule} from '@angular/forms';
 import {DatasetService} from '../../../../services/dataset.service';
 import {DatasetVersionService} from '../../../../services/datasetVersion.service';
+import {Region} from '../../../../model/enums/region.enum';
+import {Domains} from '../../../../model/enums/domains.enum';
+import {MatIcon} from '@angular/material/icon';
 
 @Component({
   selector: 'app-import-dialog',
@@ -29,35 +32,28 @@ import {DatasetVersionService} from '../../../../services/datasetVersion.service
     MatSelect,
     FormsModule,
     NgForOf,
+    MatIcon,
     MatOption
   ],
   templateUrl: './import-dialog.component.html',
   styleUrl: './import-dialog.component.scss'
 })
 export class ImportDialogComponent {
-  datasets: any[] = [];
-  versions: any[] = [];
-  selectedDataset: any;
-  selectedVersion: any;
+  domains = [
+    { value: 'GDP', label: 'BDP' },
+    { value: 'TRAFFIC', label: 'Saobraćaj' },
+    { value: 'POP', label: 'Građani' },
+    { value: 'WAGE', label: 'Plate' }
+  ];
+
+  selectedDomain!: string;
   selectedFile: File | null = null;
   fileName = '';
 
   constructor(
-    private datasetSvc: DatasetService,
-    private datasetVersionSvc: DatasetVersionService,
     private importExportSvc: ImportExportService,
     private dialogRef: MatDialogRef<ImportDialogComponent>,
   ) {}
-
-  ngOnInit() {
-    this.datasetSvc.getAllDatasets().subscribe(ds => this.datasets = ds);
-  }
-
-  loadVersions() {
-    if (!this.selectedDataset) return;
-    this.datasetVersionSvc.getAllDatasetVersionsByDatasetId(this.selectedDataset.id)
-      .subscribe(vs => this.versions = vs);
-  }
 
   onFileSelected(event: any) {
     this.selectedFile = event.target.files[0];
@@ -65,10 +61,8 @@ export class ImportDialogComponent {
   }
 
   upload() {
-    console.info(this.selectedVersion, this.selectedDataset)
     this.importExportSvc.uploadCsv(
-      this.selectedVersion.id,
-      this.selectedDataset.indicatorId,
+      this.selectedDomain,
       this.selectedFile!
     ).subscribe({
       next: (res) => this.dialogRef.close(res),

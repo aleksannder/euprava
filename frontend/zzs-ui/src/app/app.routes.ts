@@ -1,53 +1,50 @@
 import { Routes } from '@angular/router';
 import {LoginPageComponent} from './components/pages/login-page/login-page.component';
-import {DashboardPageComponent} from './components/pages/dashboard-page/dashboard-page.component';
 import {RegisterPageComponent} from './components/pages/register-page/register-page.component';
-import {authorizationGuard} from './services/auth/authorization.guard';
-import {roleGuard} from './services/auth/role.guard';
-import {Role} from './model/register-user.model';
 import {
   UnauthorizedPageComponent
 } from './components/pages/unauthorized-page/unauthorized-page.component';
 import {NotFoundPageComponent} from './components/pages/not-found-page/not-found-page.component';
-import {DomainsComponent} from './components/pages/domains/domains.component';
 import {HomeComponent} from './components/pages/home/home.component';
-import {SubdomainComponent} from './components/pages/subdomain/subdomain.component';
 import {PopulationPageComponent} from './components/pages/population-page/population-page.component';
 import {GdpPageComponent} from './components/pages/gdp-page/gdp-page.component';
 import {WagePageComponent} from './components/pages/wage-page/wage-page.component';
 import {TrafficPageComponent} from './components/pages/traffic-page/traffic-page.component';
 import {SurveysPageComponent} from './components/pages/surveys-page/surveys-page.component';
 import {SurveyFillPageComponent} from './components/pages/survey-fill-page/survey-fill-page.component';
+import {analystGuard, citizenGuard, authGuard} from './services/auth/authorization.guard';
+import {SettingsPageComponent} from './components/pages/settings-page/settings-page.component';
 
 export const routes: Routes = [
-    // Login
   {
-    path: 'login', canActivate: [], component: LoginPageComponent
-  },
-    // Register
-  {
-    path: 'register', canActivate: [], component: RegisterPageComponent
+    path: 'login', component: LoginPageComponent
   },
   {
-    path: 'home', canActivate: [], component: HomeComponent
+    path: 'register', component: RegisterPageComponent
   },
   {
-    path: 'population', canActivate: [], component: PopulationPageComponent
+    path: 'home', component: HomeComponent, canActivate: [authGuard]
   },
   {
-    path: 'gdp', canActivate: [], component: GdpPageComponent
+    path: 'settings', component: SettingsPageComponent, canActivate: [authGuard],
   },
   {
-    path: 'wage', canActivate: [], component: WagePageComponent
+    path: 'population', canActivate: [authGuard], component: PopulationPageComponent
   },
   {
-    path: 'traffic', canActivate: [], component: TrafficPageComponent
+    path: 'gdp', canActivate: [authGuard], component: GdpPageComponent
   },
   {
-    path: 'surveys', canActivate: [], component: SurveysPageComponent
+    path: 'wage', canActivate: [authGuard], component: WagePageComponent
   },
   {
-    path: 'surveys/:id/fill', canActivate: [], component: SurveyFillPageComponent
+    path: 'traffic', canActivate: [authGuard], component: TrafficPageComponent
+  },
+  {
+    path: 'surveys', canActivate: [authGuard], component: SurveysPageComponent
+  },
+  {
+    path: 'surveys/:id/fill', canActivate: [authGuard], component: SurveyFillPageComponent
   },
 
   // Unauthorized page

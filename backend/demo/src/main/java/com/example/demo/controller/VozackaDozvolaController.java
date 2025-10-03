@@ -22,30 +22,29 @@ public class VozackaDozvolaController {
         this.service = service;
     }
 
-    @PostMapping("/zahtev")
+    @PostMapping("/zahtev/{userEmail}")
     @PreAuthorize("hasRole('CITIZEN')")
-    public ResponseEntity<String> podnesiZahtev(@RequestHeader("Authorization") String token,
-                                                @RequestBody VozackaDozvolaRequest request) {
-        VozackaDozvola vozacka = service.podnesiZahtev(token, request.getKategorije());
+    public ResponseEntity<String> podnesiZahtev(@PathVariable String userEmail, @RequestBody VozackaDozvolaRequest request) {
+        VozackaDozvola vozacka = service.podnesiZahtev(userEmail, request.getKategorije());
         if (vozacka == null) return ResponseEntity.badRequest().body("Već postoji aktivan zahtev ili dozvola!");
         return ResponseEntity.ok("Zahtev uspešno podnet!");
     }
 
-    @PostMapping("/produzi")
+    @PostMapping("/produzi/{userEmail}")
     @PreAuthorize("hasRole('CITIZEN')")
-    public ResponseEntity<?> produzi(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> produzi(@PathVariable String userEmail) {
         try {
-            List<VozackaDozvola> produzeno = service.produziVozacku(token);
+            List<VozackaDozvola> produzeno = service.produziVozacku(userEmail);
             return ResponseEntity.ok(produzeno);
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    @GetMapping("/svi-zahtevi")
+    @GetMapping("/svi-zahtevi/{userEmail}")
     @PreAuthorize("hasAnyRole('CITIZEN','EMPLOYER')")
-    public ResponseEntity<List<VozackaDozvola>> sviZahtevi(@RequestHeader("Authorization") String token) {
-        return ResponseEntity.ok(service.prikaziSveZahteve(token));
+    public ResponseEntity<List<VozackaDozvola>> sviZahtevi(@PathVariable String userEmail) {
+        return ResponseEntity.ok(service.prikaziSveZahteve(userEmail));
     }
 
     @PutMapping("/odobri/{id}")

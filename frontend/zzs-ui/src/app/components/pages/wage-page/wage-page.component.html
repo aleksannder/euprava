@@ -1,6 +1,7 @@
 <div class="wage-page">
   <h1>Zaposlenost i Plate</h1>
 
+  <!-- HIGHLIGHT -->
   <div class="highlight-container" *ngIf="highlight">
     <mat-card matTooltip="Rast: {{highlight.growthRsd | number:'1.0-0'}} RSD">
       <h2>{{highlight.growthPercent | number:'1.1-2'}} %</h2>
@@ -8,12 +9,28 @@
     </mat-card>
   </div>
 
+  <!-- CHARTS -->
   <div class="charts">
-    <p-chart type="line" [data]="trendChartData" [options]="chartOptions"></p-chart>
-    <p-chart type="bar" [data]="comparisonChartData" [options]="chartOptions"></p-chart>
+    <mat-card>
+      <h3>Trend prosečne plate</h3>
+      <p-chart type="line" [data]="trendChartData" [options]="chartOptions"></p-chart>
+    </mat-card>
+
+    <mat-card>
+      <h3>Poređenje po regionima</h3>
+      <p-chart type="bar" [data]="comparisonChartData" [options]="chartOptions"></p-chart>
+    </mat-card>
   </div>
 
-  <div class="table">
+  <!-- TABLE WITH EXPORT -->
+  <div class="table-container">
+    <div class="table-header">
+      <h3>Pregled podataka</h3>
+      <button mat-icon-button color="primary" (click)="exportCsv()" matTooltip="Izvezi kao CSV">
+        <mat-icon>download</mat-icon>
+      </button>
+    </div>
+
     <app-data-table
       [columns]="[
         { key: 'year', label: 'Godina' },
@@ -22,9 +39,11 @@
         { key: 'growthPercent', label: 'Rast (%)' }
       ]"
       [data]="tableData"
-      [totalItems]="tableData.length"
-      [pageSize]="10"
-      [pageIndex]="0">
+      [totalItems]="totalItems"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex"
+      (pageChange)="onPageChange($event)"
+      (sortChange)="onSortChange($event)">
     </app-data-table>
   </div>
 </div>
