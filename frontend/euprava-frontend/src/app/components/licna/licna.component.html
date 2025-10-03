@@ -7,16 +7,16 @@
 
 <div class="container mt-5">
 
-  <div class="d-flex justify-content-center mb-4" *ngIf="!imaAktivanZahtev && !isEmployer">
+  <div class="d-flex justify-content-center mb-4" *ngIf="!imaAktivanZahtev && !(isEmployer$ | async)">
     <button class="btn btn-primary" (click)="podnesiZahtev()">Zahtev za vađenje lične</button>
   </div>
 
-  <div class="d-flex justify-content-center mb-4" *ngIf="!isEmployer && mozeProduziti">
+  <div class="d-flex justify-content-center mb-4" *ngIf="!(isEmployer$ | async) && mozeProduziti">
     <button class="btn btn-warning" (click)="produziLicnuKartu()">Produži ličnu kartu</button>
   </div>
 
-  <h3 class="mb-3 text-center" *ngIf="!isEmployer">Lična</h3>
-  <div class="table-responsive mb-5" *ngIf="!isEmployer">
+  <h3 class="mb-3 text-center" *ngIf="!(isEmployer$ | async)">Lična</h3>
+  <div class="table-responsive mb-5" *ngIf="!(isEmployer$ | async)">
     <table class="table table-striped table-bordered">
       <thead class="table-dark">
       <tr>
@@ -28,20 +28,20 @@
       <ng-container *ngFor="let zahtev of zahtevi; let i = index">
         <tr *ngIf="zahtev.status === 'DOZVOLJEN'">
           <td>{{ i + 1 }}</td>
-          <td>{{ zahtev.ime }}</td>
-          <td>{{ zahtev.prezime }}</td>
+          <td>{{ zahtev.name }}</td>
+          <td>{{ zahtev.surname }}</td>
           <td>{{ zahtev.jmbg }}</td>
-          <td>{{ zahtev.datumIzdavanja | date:'dd.MM.yyyy' }}</td>
-          <td>{{ zahtev.datumVazenja | date:'dd.MM.yyyy' }}</td>
-          <td>{{ zahtev.grad }}</td>
-          <td>{{ zahtev.drzava }}</td>
+          <td>{{ zahtev.dateOfIssuing | date:'dd.MM.yyyy' }}</td>
+          <td>{{ zahtev.validUntil | date:'dd.MM.yyyy' }}</td>
+          <td>{{ zahtev.city }}</td>
+          <td>{{ zahtev.state }}</td>
         </tr>
       </ng-container>
       </tbody>
     </table>
   </div>
 
-  <div *ngIf="isEmployer">
+  <div *ngIf="isEmployer$ | async">
     <h3 class="mb-3 text-center">Zahtevi za ličnu</h3>
     <div class="table-responsive">
       <table class="table table-striped table-bordered">
@@ -56,22 +56,22 @@
           <th>Status</th>
           <th>Grad</th>
           <th>Država</th>
-          <th *ngIf="isEmployer">Akcija</th>
+          <th *ngIf="(isEmployer$ | async)">Akcija</th>
         </tr>
         </thead>
         <tbody>
         <ng-container *ngFor="let zahtev of zahtevi; let i = index">
-          <tr *ngIf="isEmployer || zahtev.status !== 'DOZVOLJEN'">
+          <tr *ngIf="(isEmployer$ | async) || zahtev.status !== 'DOZVOLJEN'">
             <td>{{ i + 1 }}</td>
-            <td>{{ zahtev.ime }}</td>
-            <td>{{ zahtev.prezime }}</td>
+            <td>{{ zahtev.name }}</td>
+            <td>{{ zahtev.surname }}</td>
             <td>{{ zahtev.jmbg }}</td>
-            <td>{{ zahtev.datumIzdavanja | date:'dd.MM.yyyy' }}</td>
-            <td>{{ zahtev.datumVazenja | date:'dd.MM.yyyy' }}</td>
+            <td>{{ zahtev.dateOfIssuing | date:'dd.MM.yyyy' }}</td>
+            <td>{{ zahtev.validUntil | date:'dd.MM.yyyy' }}</td>
             <td>{{ zahtev.status }}</td>
-            <td>{{ zahtev.grad }}</td>
-            <td>{{ zahtev.drzava }}</td>
-            <td *ngIf="isEmployer">
+            <td>{{ zahtev.city }}</td>
+            <td>{{ zahtev.state }}</td>
+            <td *ngIf="(isEmployer$ | async)">
               <ng-container *ngIf="zahtev.status !== 'ODBIJEN' && zahtev.status !== 'DOZVOLJEN' && zahtev.status !== 'IZGUBLJEN'">
                 <button class="btn btn-success btn-sm me-2" (click)="prihvatiZahtev(zahtev.id)">Prihvati</button>
                 <button class="btn btn-danger btn-sm" (click)="odbijZahtev(zahtev.id)">Odbij</button>

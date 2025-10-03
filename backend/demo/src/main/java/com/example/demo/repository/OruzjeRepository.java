@@ -7,11 +7,12 @@ import java.util.List;
 
 public interface OruzjeRepository extends JpaRepository<Oruzje, Long> {
 
-    List<Oruzje> findAllByRegBroj(String regBroj);
-    boolean existsByKorisnik_KorisnikIDAndKategorijaOruzjaContaining(Long korisnikID, String kategorija);
-    boolean existsByKorisnik_KorisnikIDAndKategorijaOruzjaContainingAndStatusIn(
-            Long korisnikId, String kategorija, List<StatusZahteva> statusi
-    );
-    List<Oruzje> findByKorisnik_KorisnikID(Long korisnikID);
+    List<Oruzje> findAllByRegistrationNumber(String regBroj);
+    boolean existsByUser_IdAndGunCategoryContaining(Long korisnikID, String kategorija);
+    boolean existsByUser_IdAndGunCategoryContainingAndStatusIn(
+            Long korisnikId, String kategorija, List<StatusZahteva> statusi);
 
+    List<Oruzje> findByUser_Id(Long korisnikID);
+
+    Long countOruzjeByStatusEquals(StatusZahteva status);
 }

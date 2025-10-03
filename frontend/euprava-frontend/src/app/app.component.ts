@@ -1,21 +1,37 @@
-import { Component, HostListener } from '@angular/core';
+import {Component, HostListener, OnInit} from '@angular/core';
 import { Router } from '@angular/router';
 import {AuthService} from "@auth0/auth0-angular";
-import {RoleService} from "./services/role.service";
+import {Observable} from "rxjs";
+import {AuthTokenUtil} from "./interceptor/auth-token.util";
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   currentYear: number = new Date().getFullYear();
+  isEmployer$!: Observable<boolean>;
   title = 'euprava-frontend';
   public imagePath = 'assets/report.png';
   public imagePath2 = 'assets/accoun.png';
   public showProfileMenu: boolean = false;
 
-  constructor(private authService: AuthService, private router: Router, private roleService: RoleService) {}
+  constructor(private authService: AuthService, private router: Router, private authUtil: AuthTokenUtil) {
+    this.isEmployer$ = this.authUtil.hasPermission('mup:employer');
+  }
+
+  ngOnInit(): void {
+    this.authService.getAccessTokenSilently().subscribe({
+      next: (token) => {
+        console.log('Silent login uspešan, token:', token);
+      },
+      error: (err) => {
+        console.warn('Silent login nije uspeo, redirect na login', err);
+        // this.authService.loginWithRedirect();
+      }
+    });
+  }
 
   get isLoggedIn$() {
     return this.authService.isAuthenticated$;
@@ -34,10 +50,10 @@ export class AppComponent {
     }
   }
 
-  logout() {
-    this.authService.logout().subscribe(() => {
-      this.router.navigate(['/login']);
-    });
+  logout(): void {
+    this.authService.logout({ logoutParams: {
+        returnTo: window.location.origin
+      }});
   }
 
   goToProfile() {
@@ -75,8 +91,9 @@ export class AppComponent {
     this.router.navigate(['/ostalo']);
   }
 
-  get isEmployer(): boolean {
-    return this.roleService.hasRole('EMPLOYER');
+  goToSurveys(): void {
+    this.showProfileMenu = false;
+    this.router.navigate(['/surveys']);
   }
 
 }

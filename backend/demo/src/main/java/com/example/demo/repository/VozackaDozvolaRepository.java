@@ -12,8 +12,9 @@ import java.util.Optional;
 @Repository
 public interface VozackaDozvolaRepository extends JpaRepository<VozackaDozvola, Long> {
 
-    List<VozackaDozvola> findAllByKorisnik(Korisnik korisnik);
+    List<VozackaDozvola> findAllByUser(Korisnik korisnik);
 
-    Optional<VozackaDozvola> findByKorisnikAndStatus(Korisnik korisnik, StatusZahteva status);
+    Optional<VozackaDozvola> findByUserAndStatus(Korisnik korisnik, StatusZahteva status);
 
+    Long countDrivingLicensesByStatusEquals(StatusZahteva status);
 }

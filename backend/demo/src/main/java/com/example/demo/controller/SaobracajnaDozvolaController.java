@@ -19,9 +19,9 @@ public class SaobracajnaDozvolaController {
         this.service = service;
     }
 
-    @PostMapping("/zahtev")
+    @PostMapping("/zahtev/{token}")
     @PreAuthorize("hasRole('CITIZEN')")
-    public ResponseEntity<String> podnesiZahtev(@RequestHeader("Authorization") String token,
+    public ResponseEntity<String> podnesiZahtev(@PathVariable String token,
                                                 @RequestBody SaobracajnaDozvolaRequest request) {
         try {
             SaobracajnaDozvola s = service.podnesiZahtev(token, request);
@@ -35,9 +35,9 @@ public class SaobracajnaDozvolaController {
         }
     }
 
-    @PostMapping("/produzi")
+    @PostMapping("/produzi/{token}")
     @PreAuthorize("hasRole('CITIZEN')")
-    public ResponseEntity<String> produzi(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<String> produzi(@PathVariable String token) {
         try {
             service.produzi(token);
             return ResponseEntity.ok("Dozvola uspešno produžena!");
@@ -46,9 +46,9 @@ public class SaobracajnaDozvolaController {
         }
     }
 
-    @GetMapping("/svi-zahtevi")
+    @GetMapping("/svi-zahtevi/{token}")
     @PreAuthorize("hasAnyRole('CITIZEN','EMPLOYER')")
-    public ResponseEntity<List<SaobracajnaDozvola>> sviZahtevi(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<List<SaobracajnaDozvola>> sviZahtevi(@PathVariable String token) {
         return ResponseEntity.ok(service.prikaziSveZahteve(token));
     }
 

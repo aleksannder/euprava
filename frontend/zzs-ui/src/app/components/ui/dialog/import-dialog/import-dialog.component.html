@@ -1,0 +1,29 @@
+<h1 mat-dialog-title>📂 Import CSV</h1>
+
+<div mat-dialog-content class="import-dialog">
+  <!-- Izbor domena -->
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Domen</mat-label>
+    <mat-select [(ngModel)]="selectedDomain">
+      <mat-option *ngFor="let d of domains" [value]="d.value">
+        {{ d.label }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <!-- Upload fajla -->
+  <div class="file-upload">
+    <input type="file" (change)="onFileSelected($event)" accept=".csv"/>
+    <p class="file-name" *ngIf="fileName">{{ fileName }}</p>
+  </div>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-button (click)="close()">Odustani</button>
+  <button mat-raised-button color="primary"
+          (click)="upload()"
+          [disabled]="!selectedFile || !selectedDomain">
+    <mat-icon>cloud_upload</mat-icon>
+    Upload
+  </button>
+</div>

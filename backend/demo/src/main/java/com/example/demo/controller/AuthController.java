@@ -3,9 +3,8 @@ package com.example.demo.controller;
 import com.example.demo.dto.*;
 import com.example.demo.model.Korisnik;
 import com.example.demo.repository.KorisnikRepository;
-import com.example.demo.security.JwtService;
 import com.example.demo.service.KorisnikService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,15 +13,12 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
-    @Autowired
-    private KorisnikService korisnikService;
-    @Autowired
-    private KorisnikRepository korisnikRepository;
+    private final KorisnikService korisnikService;
+    private final KorisnikRepository korisnikRepository;
 
-    @Autowired
-    private JwtService jwtService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
@@ -37,40 +33,26 @@ public class AuthController {
         }
     }
 
-//    @PostMapping("/login")
-//    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-//        try {
-//            LoginResponse response = korisnikService.prijava(request);
-//            return ResponseEntity.ok(response);
-//        } catch (IllegalArgumentException e) {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Greška prilikom prijave");
-//        }
-//    }
-
-    @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
+    @GetMapping("/me/{authHeader}")
+    public ResponseEntity<?> getCurrentUser(@PathVariable String authHeader) {
         try {
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Token nedostaje");
-            }
-
-            String token = authHeader.substring(7);
-            String email = jwtService.extractEmail(token);
-            Korisnik korisnik = korisnikRepository.findByEmail(email)
+            Korisnik korisnik = korisnikRepository.findByEmail(authHeader)
                     .orElseThrow(() -> new IllegalArgumentException("Korisnik ne postoji"));
 
             return ResponseEntity.ok(new UserProfileResponse(
-                    korisnik.getKorisnikID(),
-                    korisnik.getIme(),
-                    korisnik.getPrezime(),
+                    korisnik.getId(),
+                    korisnik.getFirstName(),
+                    korisnik.getLastName(),
                     korisnik.getEmail(),
-                    korisnik.getRola()
+                    korisnik.getRole()
             ));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 
+    @PostMapping("/update/mup")
+    public void sendUserDataToMupService(@RequestBody UserSyncRequest korisnik) {
+        korisnikService.updateDbWithUserFromStatisticsService(korisnik);
+    }
 }

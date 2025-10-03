@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface SaobracajnaDozvolaRepository extends JpaRepository<SaobracajnaDozvola, Long> {
 
-    List<SaobracajnaDozvola> findAllByKorisnik(Korisnik korisnik);
-    Optional<SaobracajnaDozvola> findByKorisnikAndStatus(Korisnik korisnik, StatusZahteva status);
-
+    List<SaobracajnaDozvola> findAllByUser(Korisnik korisnik);
+    Optional<SaobracajnaDozvola> findByUserAndStatus(Korisnik korisnik, StatusZahteva status);
+    Long countVehicleLicencesByStatusEquals(StatusZahteva status);
 }

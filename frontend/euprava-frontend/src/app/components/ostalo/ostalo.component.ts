@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { ZahteviService, UnifiedZahtevResponse } from '../../services/zahtevi.service';
 import {Role} from "../../models/korisnik";
 import {RoleService} from "../../services/role.service";
+import {Observable} from "rxjs";
+import {AuthTokenUtil} from "../../interceptor/auth-token.util";
 
 interface UnifiedItem {
   id: string | number;
@@ -19,40 +21,31 @@ interface UnifiedItem {
 export class OstaloComponent implements OnInit {
   zahtevi: UnifiedItem[] = [];
   message = '';
-  rola: Role = Role.CITIZEN;
   alertMessage: string = '';
+  isEmployer$!: Observable<boolean>;
+  userEmail!: string;
   alertType: 'success' | 'error' = 'success';
   showAlert: boolean = false;
   maticnaPodaci: any = null;
   prikaziMaticnu: boolean = false;
 
-  constructor(private zahteviService: ZahteviService, private roleService: RoleService) {}
+  constructor(private zahteviService: ZahteviService, private authUtil: AuthTokenUtil) {}
 
   ngOnInit(): void {
-    this.ucitajZahteve();
-    this.roleService.getRoles$().subscribe(roles => {
-      const role = roles[0];
-
-      switch (role) {
-        case 'EMPLOYER':
-          this.rola = Role.EMPLOYER;
-          break;
-        case 'CITIZEN':
-          this.rola = Role.CITIZEN;
-          break;
-        default:
-          this.rola = Role.CITIZEN;
-      }
-    });
+    this.authUtil.getUserProfile().subscribe((user) => {
+      this.userEmail = user.email;
+      this.ucitajZahteve(this.userEmail);
+      this.isEmployer$ = this.authUtil.hasPermission('mup:employer');
+    })
   }
 
   selectedDokument: string = '';
   aktivniDokumenti: UnifiedItem[] = [];
   noviZahtev: { tip: string; datumPrijave: string } = { tip: '', datumPrijave: '' };
 
-  ucitajZahteve(): void {
+  ucitajZahteve(userEmail: string): void {
     this.message = 'Učitavam...';
-    this.zahteviService.getMojiZahtevi().subscribe({
+    this.zahteviService.getMojiZahtevi(userEmail).subscribe({
       next: (data) => {
         this.zahtevi = this.normalize(data);
         this.sortByDateDesc();
@@ -79,12 +72,12 @@ export class OstaloComponent implements OnInit {
       datumPrijave: danasnjiDatum
     };
 
-    this.zahteviService.prijaviIzgubljeniDokument(payload).subscribe({
+    this.zahteviService.prijaviIzgubljeniDokument(payload, this.userEmail).subscribe({
       next: (res) => {
         this.alertMessage = res.message;
         this.alertType = 'success';
         this.showAlert = true;
-        this.ucitajZahteve();
+        this.ucitajZahteve(this.userEmail);
         this.selectedDokument = '';
       },
       error: (err) => {
@@ -145,10 +138,6 @@ export class OstaloComponent implements OnInit {
     return out;
   }
 
-  get isEmployer(): boolean {
-    return this.rola === Role.EMPLOYER;
-  }
-
   closeAlert(): void {
     this.showAlert = false;
   }
@@ -158,7 +147,7 @@ export class OstaloComponent implements OnInit {
 
     if (this.prikaziMaticnu && !this.maticnaPodaci) {
       // poziv servisa za preuzimanje podataka
-      this.zahteviService.getMaticnaKnjiga().subscribe({
+      this.zahteviService.getMaticnaKnjiga(this.userEmail).subscribe({
         next: (data) => {
           this.maticnaPodaci = data;
         },

@@ -11,6 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -45,30 +46,30 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(STATELESS))
                 .authorizeHttpRequests(reg -> reg
                         .requestMatchers("/api/public/**", "/api/auth/**").permitAll()
-                        .requestMatchers("/api/citizen/**").hasAnyRole("CITIZEN", "EMPLOYEE")
-                        .requestMatchers("/api/employee/**").hasAnyRole("EMPLOYEE")
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(
-                        jwt -> jwt.jwtAuthenticationConverter(permissionsToAuthorities()))
+                        jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 );
         return http.build();
     }
 
     @Bean
-    Converter<Jwt, ? extends AbstractAuthenticationToken> permissionsToAuthorities() {
-        return jwt -> {
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        JwtAuthenticationConverter conv = new JwtAuthenticationConverter();
+        conv.setJwtGrantedAuthoritiesConverter(jwt -> {
             var auths = new ArrayList<GrantedAuthority>();
             var perms = (Collection<String>) jwt.getClaims().getOrDefault("permissions", List.of());
 
             for (String p : perms) {
                 switch (p) {
                     case "citizen:access"  -> auths.add(new SimpleGrantedAuthority("ROLE_CITIZEN"));
-                    case "mup:employee" -> auths.add(new SimpleGrantedAuthority("ROLE_EMPLOYER"));
+                    case "mup:employer" -> auths.add(new SimpleGrantedAuthority("ROLE_EMPLOYER"));
                 }
             }
-            return new JwtAuthenticationToken(jwt, auths, jwt.getSubject());
-        };
+            return auths;
+        });
+        return conv;
     }
 
     @Bean

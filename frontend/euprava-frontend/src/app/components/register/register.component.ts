@@ -1,7 +1,10 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
-import {Korisnik} from "../../models/korisnik";
+import {Korisnik, Role} from "../../models/korisnik";
+import {Region, RegionUtil} from "../../models/enums/region.enum";
+import {UsersService} from "../../services/users.service";
+import {AuthService} from "@auth0/auth0-angular";
 
 @Component({
   selector: 'app-register',
@@ -15,6 +18,7 @@ export class RegisterComponent {
   public alertType: 'success' | 'error' = 'error';
   public showModal: boolean = false;
   public today: string = '';
+  public regions: Region[] = Object.values(Region);
 
   get ime() { return this.registerForm.get('ime'); }
   get prezime() { return this.registerForm.get('prezime'); }
@@ -24,10 +28,13 @@ export class RegisterComponent {
   get grad() { return this.registerForm.get('grad'); }
   get adresa() { return this.registerForm.get('adresa'); }
   get pol() { return this.registerForm.get('pol'); }
+  get region() { return this.registerForm.get('region'); }
 
   constructor(
     private fb: FormBuilder,
+    private userService: UsersService,
     private router: Router,
+    private auth0: AuthService
   ) {
     const danas = new Date();
     danas.setDate(danas.getDate() - 1);
@@ -52,11 +59,12 @@ export class RegisterComponent {
           Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{8,}$/)
         ]
       ],
-      rola: ['CITIZEN', Validators.required],
+      rola: [Role.CITIZEN],
       datumRodjenja: ['', [Validators.required, this.pastDateValidator]],
       grad: ['', Validators.required],
       adresa: ['', Validators.required],
-      pol: ['', Validators.required]
+      pol: ['', Validators.required],
+      region: ['', Validators.required]
     });
 
   }
@@ -127,13 +135,22 @@ export class RegisterComponent {
     }
 
     if (this.registerForm.valid) {
-      // todo: handle register
-      const korisnikData: Korisnik = this.registerForm.value;
-      // this.authService.register(korisnikData).subscribe({
-      //   next: () => this.showAlert('Registracija uspešna!', 'success'),
-      //   error: (error) => this.showAlert(error.error || 'Došlo je do greške pri registraciji.', 'error')
-      // });
+      const userRegisterRequest: Korisnik = this.registerForm.value;
+      console.info(userRegisterRequest);
+      if (userRegisterRequest) {
+        this.userService.register(userRegisterRequest).subscribe({
+          next: () => {
+            this.showAlert('Registracija uspešna!', 'success');
+              this.auth0.loginWithRedirect();
+          },
+          error: (error) => {
+            this.showAlert(error.error || 'Došlo je do greške pri registraciji.', 'error');
+            console.error(error);
+          }
+        });
+      }
     }
   }
 
+  protected readonly RegionUtil = RegionUtil;
 }

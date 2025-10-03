@@ -1,1 +1,76 @@
-<p>dashboard-page works!</p>
+<mat-sidenav-container class="sidenav-container" fullscreen>
+  <!-- COLLAPSIBLE SIDENAV -->
+  <mat-sidenav #drawer class="sidenav" mode="side" [opened]="isExpanded">
+    <mat-nav-list>
+      <a mat-list-item routerLink="/home">
+        <mat-icon class="nav-icon">home</mat-icon>
+        <span *ngIf="isExpanded">Naslovna strana</span>
+      </a>
+      <a mat-list-item routerLink="/gdp">
+        <mat-icon class="nav-icon">account_balance</mat-icon>
+        <span *ngIf="isExpanded">Ekonomija</span>
+      </a>
+      <a mat-list-item routerLink="/traffic">
+        <mat-icon class="nav-icon">traffic_jam</mat-icon>
+        <span *ngIf="isExpanded">Saobraćaj</span>
+      </a>
+      <a mat-list-item routerLink="/wage">
+        <mat-icon class="nav-icon">currency_exchange</mat-icon>
+        <span *ngIf="isExpanded">Plate</span>
+      </a>
+      <a mat-list-item routerLink="/population">
+        <mat-icon class="nav-icon">people</mat-icon>
+        <span *ngIf="isExpanded">Građani</span>
+      </a>
+      <ng-container *ngIf="(isAnalyst$ | async)">
+        <a mat-list-item (click)="onImport()">
+          <mat-icon class="nav-icon">upload_file</mat-icon>
+          <span *ngIf="isExpanded">Import</span>
+        </a>
+      </ng-container>
+      <ng-container *ngIf="isAnalyst$ | async">
+        <a mat-list-item (click)="onCreateSurvey()">
+          <mat-icon class="nav-icon">assignment</mat-icon>
+          <span *ngIf="isExpanded">Kreiraj anketu</span>
+        </a>
+      </ng-container>
+      <a mat-list-item routerLink="/surveys">
+        <mat-icon class="nav-icon">content_paste_go</mat-icon>
+        <span *ngIf="isExpanded">Ankete</span>
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <!-- TOOLBAR -->
+    <mat-toolbar color="primary" class="shadow-md">
+      <button mat-icon-button (click)="toggleSidebar()">
+        <mat-icon>{{ isExpanded ? 'menu_open' : 'menu' }}</mat-icon>
+      </button>
+      <span>Zavod za Statistiku</span>
+      <span class="spacer"></span>
+      <ng-container *ngIf="(isAuthenticated$ | async)">
+        <button mat-icon-button [matMenuTriggerFor]="accountMenu">
+          <mat-icon>account_circle</mat-icon>
+        </button>
+        <mat-menu #accountMenu="matMenu">
+          <ng-container *ngIf="(isCitizen$ | async)">
+            <button mat-menu-item (click)="goToSettings()">
+              <mat-icon>settings</mat-icon>
+              <span>Vaš nalog</span>
+            </button>
+          </ng-container>
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Izlogujte se</span>
+          </button>
+        </mat-menu>
+      </ng-container>
+    </mat-toolbar>
+
+    <div class="content">
+      <router-outlet></router-outlet>
+    </div>
+
+  </mat-sidenav-content>
+</mat-sidenav-container>

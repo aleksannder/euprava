@@ -4,18 +4,18 @@ import { Observable } from 'rxjs';
 
 export interface SaobracajnaDozvola {
   id: number;
-  ime: string;
-  prezime: string;
-  adresa: string;
-  marka: string;
+  firstName: string;
+  lastName: string;
+  address: string;
+  make: string;
   model: string;
-  kubikaza: number;
-  godiste: number;
-  vrstaPogona: string;
-  tablice: string;
-  datumIzdavanja: string;
-  datumVazenja: string;
-  brojDozvole: string;
+  displacement: number;
+  manufacturedYear: number;
+  fuelType: string;
+  plateNumber: string;
+  dateOfIssuing: string;
+  validUntil: string;
+  drivingLicenseNumber: string;
   status: string;
 }
 
@@ -24,39 +24,30 @@ export interface SaobracajnaDozvola {
 })
 export class SaobracajnaService {
 
-  private baseUrl = 'http://localhost:8080/saobracajna-dozvola';
+  private baseUrl = 'http://localhost:8081/saobracajna-dozvola';
 
   constructor(private http: HttpClient) { }
 
-  private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('jwtToken');
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    });
+  dohvatiSve(userEmail: string): Observable<SaobracajnaDozvola[]> {
+    return this.http.get<SaobracajnaDozvola[]>(`${this.baseUrl}/svi-zahtevi/${userEmail}`);
   }
 
-  dohvatiSve(): Observable<SaobracajnaDozvola[]> {
-    return this.http.get<SaobracajnaDozvola[]>(`${this.baseUrl}/svi-zahtevi`, { headers: this.getHeaders() });
-  }
-
-  podnesiZahtev(payload: any): Observable<string> {
-    return this.http.post(`${this.baseUrl}/zahtev`, payload, {
-      headers: this.getHeaders(),
+  podnesiZahtev(payload: any, userEmail: string): Observable<string> {
+    return this.http.post(`${this.baseUrl}/zahtev/${userEmail}`, payload, {
       responseType: 'text'
     });
   }
 
-  produzi(): Observable<any> {
-    return this.http.post(`${this.baseUrl}/produzi`, {}, { headers: this.getHeaders() });
+  produzi(userEmail: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/produzi/${userEmail}`, {});
   }
 
   odobriZahtev(id: number): Observable<any> {
-    return this.http.put(`${this.baseUrl}/odobri/${id}`, {}, { headers: this.getHeaders() });
+    return this.http.put(`${this.baseUrl}/odobri/${id}`, {});
   }
 
   odbijZahtev(id: number): Observable<any> {
-    return this.http.put(`${this.baseUrl}/odbij/${id}`, {}, { headers: this.getHeaders() });
+    return this.http.put(`${this.baseUrl}/odbij/${id}`, {});
   }
 
 }

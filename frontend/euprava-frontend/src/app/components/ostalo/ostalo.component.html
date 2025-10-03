@@ -1,4 +1,4 @@
-<div class="container mt-4" *ngIf="!isEmployer">
+<div class="container mt-4" *ngIf="!(isEmployer$ | async)">
   <h2 class="mb-3 text-center">📋 Moji zahtevi</h2>
 
 
@@ -68,11 +68,11 @@
         <tbody>
         <tr>
           <th>Ime</th>
-          <td>{{ maticnaPodaci.ime }}</td>
+          <td>{{ maticnaPodaci.firstName }}</td>
         </tr>
         <tr>
           <th>Prezime</th>
-          <td>{{ maticnaPodaci.prezime }}</td>
+          <td>{{ maticnaPodaci.lastName }}</td>
         </tr>
         <tr>
           <th>JMBG</th>
@@ -80,15 +80,15 @@
         </tr>
         <tr>
           <th>Datum rođenja</th>
-          <td>{{ maticnaPodaci.datumRodjenja | date:'dd.MM.yyyy' }}</td>
+          <td>{{ maticnaPodaci.dateOfBirth | date:'dd.MM.yyyy' }}</td>
         </tr>
         <tr>
           <th>Mesto rođenja</th>
-          <td>{{ maticnaPodaci.grad }}</td>
+          <td>{{ maticnaPodaci.city }}</td>
         </tr>
         <tr>
           <th>Adresa</th>
-          <td>{{ maticnaPodaci.adresa }}</td>
+          <td>{{ maticnaPodaci.address }}</td>
         </tr>
         </tbody>
       </table>

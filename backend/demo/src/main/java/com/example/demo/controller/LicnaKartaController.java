@@ -1,13 +1,11 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.LicnaKartaRequest;
 import com.example.demo.model.LicnaKarta;
 import com.example.demo.service.LicnaKartaService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,10 +20,10 @@ public class LicnaKartaController {
         this.licnaKartaService = licnaKartaService;
     }
 
-    @PostMapping("/zahtev")
     @PreAuthorize("hasRole('CITIZEN')")
-    public ResponseEntity<String> podnesiZahtev(@RequestHeader("Authorization") String token) {
-        LicnaKarta licnaKarta = licnaKartaService.podnesiZahtevIzTokena(token, "Srbija");
+    @PostMapping("/zahtev/{userEmail}")
+    public ResponseEntity<String> podnesiZahtev(@PathVariable String userEmail) {
+        LicnaKarta licnaKarta = licnaKartaService.podnesiZahtevIzTokena(userEmail, "Srbija");
 
         if (licnaKarta == null) {
             return ResponseEntity.badRequest().body("Korisnik već ima podnet zahtev ili izdata ličnu kartu!");
@@ -34,21 +32,21 @@ public class LicnaKartaController {
         return ResponseEntity.ok("Zahtev za izdavanje lične karte je uspešno podnet!");
     }
 
-    @PostMapping("/produzi")
+    @PostMapping("/produzi/{userEmail}")
     @PreAuthorize("hasRole('CITIZEN')")
-    public ResponseEntity<String> produziLicnu(@RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<String> produziLicnu(@PathVariable String userEmail) {
         try {
-            licnaKartaService.produziLicnuKartu(authorizationHeader);
+            licnaKartaService.produziLicnuKartu(userEmail);
             return ResponseEntity.ok(" Lična karta je uspešno produžena!");
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body( e.getMessage());
         }
     }
 
-    @GetMapping("/svi-zahtevi")
+    @GetMapping("/svi-zahtevi/{userEmail}")
     @PreAuthorize("hasAnyRole('CITIZEN','EMPLOYER')")
-    public ResponseEntity<List<LicnaKarta>> sviZahtevi(@RequestHeader("Authorization") String authorizationHeader) {
-        List<LicnaKarta> licneKarte = licnaKartaService.prikaziSveZahteve(authorizationHeader);
+    public ResponseEntity<List<LicnaKarta>> sviZahtevi(@PathVariable String userEmail) {
+        List<LicnaKarta> licneKarte = licnaKartaService.prikaziSveZahteve(userEmail);
         return ResponseEntity.ok(licneKarte);
     }
 

@@ -6,7 +6,7 @@ import com.example.demo.model.Role;
 import com.example.demo.model.StatusZahteva;
 import com.example.demo.repository.KorisnikRepository;
 import com.example.demo.repository.LicnaKartaRepository;
-import com.example.demo.security.JwtService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -15,31 +15,19 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class LicnaKartaService {
 
     private final LicnaKartaRepository licnaKartaRepository;
     private final KorisnikRepository korisnikRepository;
-    private final JwtService jwtService;
 
-    public LicnaKartaService(LicnaKartaRepository licnaKartaRepository,
-                             KorisnikRepository korisnikRepository,
-                             JwtService jwtService) {
-        this.licnaKartaRepository = licnaKartaRepository;
-        this.korisnikRepository = korisnikRepository;
-        this.jwtService = jwtService;
-    }
 
     public LicnaKarta podnesiZahtevIzTokena(String token, String drzava) {
-        if (token.startsWith("Bearer ")) {
-            token = token.substring(7);
-        }
 
-        String email = jwtService.extractEmail(token);
-
-        Korisnik korisnik = korisnikRepository.findByEmail(email)
+        Korisnik korisnik = korisnikRepository.findByEmail(token)
                 .orElseThrow(() -> new IllegalArgumentException("Korisnik ne postoji"));
 
-        List<LicnaKarta> licne = licnaKartaRepository.findAllByKorisnik(korisnik);
+        List<LicnaKarta> licne = licnaKartaRepository.findAllByUser(korisnik);
 
         boolean postojiAktivanZahtev = licne.stream()
                 .anyMatch(l -> l.getStatus() == StatusZahteva.CEKANJE || l.getStatus() == StatusZahteva.DOZVOLJEN);
@@ -49,59 +37,54 @@ public class LicnaKartaService {
         }
 
         LicnaKarta licnaKarta = new LicnaKarta();
-        licnaKarta.setKorisnik(korisnik);
-        licnaKarta.setIme(korisnik.getIme());
-        licnaKarta.setPrezime(korisnik.getPrezime());
+        licnaKarta.setUser(korisnik);
+        licnaKarta.setName(korisnik.getFirstName());
+        licnaKarta.setSurname(korisnik.getLastName());
         licnaKarta.setJmbg(korisnik.getJmbg());
-        licnaKarta.setDatumRodjenja(korisnik.getDatumRodjenja());
-        licnaKarta.setPol(korisnik.getPol());
-        licnaKarta.setGrad(korisnik.getGrad());
-        licnaKarta.setDrzava(drzava);
+        licnaKarta.setDateOfBirth(korisnik.getDateOfBirth());
+        licnaKarta.setGender(korisnik.getGender());
+        licnaKarta.setCity(korisnik.getCity());
+        licnaKarta.setState(drzava);
         licnaKarta.setStatus(StatusZahteva.CEKANJE);
-        licnaKarta.setRegBroj(UUID.randomUUID().toString());
-        licnaKarta.setDatumIzdavanja(LocalDate.now());
-        licnaKarta.setDatumVazenja(LocalDate.now().plusYears(10));
+        licnaKarta.setRegistrationNumber(UUID.randomUUID().toString());
+        licnaKarta.setDateOfIssuing(LocalDate.now());
+        licnaKarta.setValidUntil(LocalDate.now().plusYears(10));
 
         return licnaKartaRepository.save(licnaKarta);
     }
 
     public LicnaKarta produziLicnuKartu(String authorizationHeader) {
-        if (authorizationHeader.startsWith("Bearer ")) {
-            authorizationHeader = authorizationHeader.substring(7);
-        }
 
-        String email = jwtService.extractEmail(authorizationHeader);
-
-        Korisnik korisnik = korisnikRepository.findByEmail(email)
+        Korisnik korisnik = korisnikRepository.findByEmail(authorizationHeader)
                 .orElseThrow(() -> new IllegalArgumentException("Korisnik ne postoji"));
 
-        Optional<LicnaKarta> aktivnaLicnaOpt = licnaKartaRepository.findByKorisnikAndStatus(korisnik, StatusZahteva.DOZVOLJEN);
+        Optional<LicnaKarta> aktivnaLicnaOpt = licnaKartaRepository.findByUserAndStatus(korisnik, StatusZahteva.DOZVOLJEN);
 
         if (aktivnaLicnaOpt.isPresent()) {
             LicnaKarta licna = aktivnaLicnaOpt.get();
             LocalDate danas = LocalDate.now();
-            LocalDate datumIsteka = licna.getDatumVazenja();
+            LocalDate datumIsteka = licna.getValidUntil();
 
             if (datumIsteka.isAfter(danas.plusMonths(1))) {
                 throw new IllegalStateException("Lična karta još nije spremna za produženje (više od mesec dana do isteka).");
             }
 
-            licna.setDatumIzdavanja(danas);
-            licna.setDatumVazenja(danas.plusYears(10));
-            licna.setRegBroj(UUID.randomUUID().toString());
+            licna.setDateOfIssuing(danas);
+            licna.setValidUntil(danas.plusYears(10));
+            licna.setRegistrationNumber(UUID.randomUUID().toString());
 
             return licnaKartaRepository.save(licna);
         }
 
-        Optional<LicnaKarta> odbijeniZahtevOpt = licnaKartaRepository.findByKorisnikAndStatus(korisnik, StatusZahteva.ODBIJEN);
+        Optional<LicnaKarta> odbijeniZahtevOpt = licnaKartaRepository.findByUserAndStatus(korisnik, StatusZahteva.ODBIJEN);
 
         if (odbijeniZahtevOpt.isPresent()) {
             LicnaKarta novaLicna = new LicnaKarta();
-            novaLicna.setKorisnik(korisnik);
-            novaLicna.setDatumIzdavanja(LocalDate.now());
-            novaLicna.setDatumVazenja(LocalDate.now().plusYears(10));
+            novaLicna.setUser(korisnik);
+            novaLicna.setDateOfIssuing(LocalDate.now());
+            novaLicna.setValidUntil(LocalDate.now().plusYears(10));
             novaLicna.setStatus(StatusZahteva.CEKANJE);
-            novaLicna.setRegBroj(UUID.randomUUID().toString());
+            novaLicna.setRegistrationNumber(UUID.randomUUID().toString());
 
             return licnaKartaRepository.save(novaLicna);
         }
@@ -110,20 +93,15 @@ public class LicnaKartaService {
     }
 
     public List<LicnaKarta> prikaziSveZahteve(String authorizationHeader) {
-        if (authorizationHeader.startsWith("Bearer ")) {
-            authorizationHeader = authorizationHeader.substring(7);
-        }
 
-        String email = jwtService.extractEmail(authorizationHeader);
-
-        Korisnik korisnik = korisnikRepository.findByEmail(email)
+        Korisnik korisnik = korisnikRepository.findByEmail(authorizationHeader)
                 .orElseThrow(() -> new IllegalArgumentException("Korisnik ne postoji"));
 
-        if (korisnik.getRola() == Role.EMPLOYER) {
+        if (korisnik.getRole() == Role.EMPLOYER) {
             return licnaKartaRepository.findAll();
         }
 
-        return licnaKartaRepository.findAllByKorisnik(korisnik);
+        return licnaKartaRepository.findAllByUser(korisnik);
     }
 
     public LicnaKarta odobriZahtev(Long licnaId) {
@@ -154,7 +132,7 @@ public class LicnaKartaService {
         LicnaKarta licna = licnaKartaRepository.findById(licnaId)
                 .orElseThrow(() -> new IllegalArgumentException("Lična karta ne postoji"));
 
-        if (!licna.getKorisnik().getEmail().equals(email)) {
+        if (!licna.getUser().getEmail().equals(email)) {
             throw new IllegalArgumentException("Niste ovlašćeni za ovaj dokument");
         }
 

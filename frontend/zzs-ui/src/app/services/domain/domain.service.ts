@@ -1,24 +1,14 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
-import {Domain} from '../../model/domain.model';
 import {Observable} from 'rxjs';
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class DomainService {
-  private baseUrl: string = `http://localhost:8080/api/domain`;
+  private baseUrl: string = 'http://localhost:8080/api/domains';
 
   constructor(private http: HttpClient) { }
 
-  public getDomainById(domainId: number): Observable<Domain> {
-    return this.http.get<Domain>(`${this.baseUrl}/${domainId}`);
+  getAll(): Observable<any> {
+    return this.http.get<any>(this.baseUrl);
   }
-
-  public getAllDomains(): Observable<Domain[]> {
-    return this.http.get<Domain[]>(`${this.baseUrl}`);
-  }
-
-  public deleteDomain(domainId: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${domainId}`);
-  }
-  
 }

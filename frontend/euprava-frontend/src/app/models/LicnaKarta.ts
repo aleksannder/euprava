@@ -1,11 +1,11 @@
 export interface LicnaKarta {
   id: number;
-  ime: string;
-  prezime: string;
+  name: string;
+  surname: string;
   jmbg: string;
-  datumIzdavanja: string;
-  datumVazenja: string;
-  grad: string;
-  drzava: string;
+  dateOfIssuing: string;
+  validUntil: string;
+  city: string;
+  state: string;
   status: string;
 }

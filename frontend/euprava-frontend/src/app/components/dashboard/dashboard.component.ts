@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import {Role} from "../../models/korisnik";
 import {RoleService} from "../../services/role.service";
+import {Observable} from "rxjs";
+import {AuthService} from "@auth0/auth0-angular";
+import {AuthTokenUtil} from "../../interceptor/auth-token.util";
 
 @Component({
   selector: 'app-dashboard',
@@ -8,29 +11,14 @@ import {RoleService} from "../../services/role.service";
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
-  rola: Role = Role.EMPLOYER;
+  isEmployer$!: Observable<boolean>
 
-  constructor(private roleService: RoleService) {}
+  constructor(private userAuthUtil: AuthTokenUtil) {
+    this.isEmployer$ = this.userAuthUtil.hasPermission('mup:employer');
+  }
 
   ngOnInit(): void {
-    this.roleService.getRoles$().subscribe(roles => {
-      const role = roles[0];
-
-      switch (role) {
-        case 'EMPLOYER':
-          this.rola = Role.EMPLOYER;
-          break;
-        case 'CITIZEN':
-          this.rola = Role.CITIZEN;
-          break;
-        default:
-          this.rola = Role.CITIZEN;
-      }
-    });
-
+    this.isEmployer$ = this.userAuthUtil.hasPermission('mup:employer');
   }
 
-  get isEmployer(): boolean {
-    return this.rola === Role.EMPLOYER;
-  }
 }

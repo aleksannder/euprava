@@ -1,37 +1,21 @@
-.login-container {
-  height: 100%;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
-}
-
-.login-card {
-  width: 100%;
+.register-page {
   max-width: 400px;
-  padding: 1rem;
-  border-radius: 16px;
-}
+  margin: 40px auto;
+  padding: 20px;
+  text-align: center;
 
-mat-card-header {
-  justify-content: center;
-  margin-bottom: 1rem;
-
-  mat-card-title {
+  form {
     display: flex;
-    align-items: center;
-    font-size: 1.5rem;
-    font-weight: 600;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .full-width {
+    width: 100%;
   }
 }
 
-.full-width {
-  width: 100%;
-}
-
-.actions {
-  margin-top: 1.5rem;
-  display: flex;
-  justify-content: center;
+.redirect-text {
+  margin-top: 1rem;
+  font-size: 0.9rem;
 }

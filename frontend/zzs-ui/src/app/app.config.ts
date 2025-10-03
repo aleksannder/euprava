@@ -1,4 +1,4 @@
-import {ApplicationConfig, provideZoneChangeDetection} from '@angular/core';
+import {ApplicationConfig, importProvidersFrom, provideZoneChangeDetection} from '@angular/core';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
@@ -6,6 +6,8 @@ import {provideHttpClient, withInterceptors} from '@angular/common/http';
 import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
 import {authInterceptor} from './services/auth/auth.interceptor';
 import {provideAuth0} from '@auth0/auth0-angular';
+import {provideNativeDateAdapter} from '@angular/material/core';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 // ZZS-APP SPA
 const AUTH0_DOMAIN: string = 'dev-7wsgpcp2kp2ul4ct.us.auth0.com';
@@ -18,6 +20,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideAnimationsAsync(),
+    importProvidersFrom(BrowserAnimationsModule),
     provideHttpClient(withInterceptors([authInterceptor])),
     provideAuth0({
       domain: AUTH0_DOMAIN,
@@ -25,7 +28,7 @@ export const appConfig: ApplicationConfig = {
       authorizationParams: {
         redirect_uri: window.location.origin,
         audience: AUTH0_IDENTIFIER,
-        scope: 'openid profile email'
+        scope: 'openid profile email offline_access'
       },
       cacheLocation: 'localstorage',
       useRefreshTokens: true

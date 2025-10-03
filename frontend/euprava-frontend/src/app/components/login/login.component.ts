@@ -22,7 +22,6 @@ export class LoginComponent {
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      lozinka: ['', Validators.required]
     });
   }
 
@@ -38,10 +37,23 @@ export class LoginComponent {
   }
 
   public onSubmit(): void {
-    try {
-      this.authService.loginWithRedirect();
-    } catch (e) {
-      console.error(e);
+    if (this.loginForm.valid) {
+      try {
+        this.authService.loginWithRedirect({
+          authorizationParams: { login_hint: this.loginForm.controls['email'].value }
+        }).subscribe({
+          next: () => {
+            this.router.navigate(['/dashboard']);
+          },
+          error: (error) => {
+            this.alertMessage = 'Login failed: ' + (error?.message || 'Unknown error');
+          }
+        });
+      } catch (exception) {
+        this.alertMessage = 'Unexpected error occurred';
+      }
+    } else {
+      this.alertMessage = 'Form is invalid. Please check your inputs.';
     }
   }
 

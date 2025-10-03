@@ -1,0 +1,27 @@
+<div class="dashboard">
+  <h1 class="text-center">Zavod za statistiku</h1>
+
+  <!-- STATISTICS HIGHLIGHTS -->
+  <h2>Statistika</h2>
+  <div class="highlight-grid">
+    <mat-card *ngFor="let stat of statHighlights" [routerLink]="['/', stat.link]" class="highlight-card" matTooltip="{{stat.description}}">
+      <mat-icon>{{ stat.icon }}</mat-icon>
+      <div>
+        <h3>{{stat.value}}</h3>
+        <p>{{stat.label}}</p>
+      </div>
+    </mat-card>
+  </div>
+
+  <!-- MUP HIGHLIGHTS -->
+  <h2>MUP</h2>
+  <div class="highlight-grid">
+    <mat-card *ngFor="let mup of mupHighlights" class="highlight-card" matTooltip="{{mup.description}}">
+      <mat-icon>{{ mup.icon }}</mat-icon>
+      <div>
+        <h3>{{mup.value}}</h3>
+        <p>{{mup.label}}</p>
+      </div>
+    </mat-card>
+  </div>
+</div>

@@ -1,0 +1,13 @@
+DROP TABLE IF EXISTS data_point;
+DROP TABLE IF EXISTS dataset_version;
+DROP TABLE IF EXISTS import_job;
+DROP TABLE IF EXISTS indicator_dimension;
+DROP TABLE IF EXISTS measure;
+DROP TABLE IF EXISTS dataset;
+DROP TABLE IF EXISTS dimension;
+DROP TABLE IF EXISTS "indicator";
+DROP TABLE IF EXISTS unit;
+DROP TABLE IF EXISTS subdomain;
+DROP TABLE IF EXISTS "domain";
+
+

@@ -1,0 +1,38 @@
+<div class="fill-survey" *ngIf="survey && !hasResponded">
+  <h1>{{ survey.title }}</h1>
+  <h6>Domen: {{ SurveyDomainUtil.getLabel(survey.domain) }}</h6>
+
+  <form [formGroup]="surveyForm" (ngSubmit)="onSubmit()">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Region</mat-label>
+      <mat-select formControlName="region">
+        <mat-option *ngFor="let r of regions" [value]="r">
+          {{ RegionUtil.getLabel(r) }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <div *ngFor="let q of survey.questions">
+      <mat-form-field appearance="outline" class="full-width" *ngIf="q.type === 'NUMBER'">
+        <mat-label>{{ q.text }}</mat-label>
+        <input matInput type="number" formControlName="q_{{q.id}}">
+      </mat-form-field>
+
+      <div *ngIf="q.type === 'YES_NO'" class="yes-no-question">
+        <p>{{ q.text }}</p>
+        <mat-radio-group formControlName="q_{{q.id}}">
+          <mat-radio-button value="YES">Da</mat-radio-button>
+          <mat-radio-button value="NO">Ne</mat-radio-button>
+        </mat-radio-group>
+      </div>
+    </div>
+
+    <button mat-flat-button color="primary" type="submit">
+      Pošalji odgovore
+    </button>
+  </form>
+</div>
+
+<div *ngIf="hasResponded" class="already-responded">
+  <h2>Već ste popunili ovu anketu ✅</h2>
+</div>

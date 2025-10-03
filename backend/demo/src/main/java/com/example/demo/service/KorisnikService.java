@@ -1,84 +1,37 @@
 package com.example.demo.service;
 
-import com.example.demo.dto.LoginRequest;
-import com.example.demo.dto.LoginResponse;
+import com.example.demo.client.ZzsClient;
 import com.example.demo.dto.RegisterRequest;
-import com.example.demo.dto.RegisterResponse;
+import com.example.demo.dto.UserSyncRequest;
 import com.example.demo.model.Korisnik;
 import com.example.demo.model.Role;
 import com.example.demo.repository.KorisnikRepository;
-import com.example.demo.security.JwtService;
 import com.example.demo.service.auth.Auth0ManagementClient;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class KorisnikService {
 
-    @Autowired
-    private Auth0ManagementClient client;
+    private final Auth0ManagementClient client;
 
-    @Autowired
-    private KorisnikRepository korisnikRepository;
+    private final KorisnikRepository korisnikRepository;
+
+    private final ZzsClient zzsClient;
 
     @Value("${auth0.m2m.db.connection}")
     private String connection;
 
     @Value("${auth0.m2m.roles.citizen}")
     private String roleCitizen;
-
-//    private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-//
-//    private static final Pattern PASSWORD_PATTERN =
-//            Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\W).{8,}$");
-//
-//    public RegisterResponse registracija(RegisterRequest request) {
-//        if (korisnikRepository.findByEmail(request.getEmail()).isPresent()) {
-//            throw new IllegalArgumentException("Email je već registrovan");
-//        }
-//
-//        if (!PASSWORD_PATTERN.matcher(request.getLozinka()).matches()) {
-//            throw new IllegalArgumentException(
-//                    "Lozinka mora imati najmanje 8 karaktera, uključujući veliko i malo slovo i specijalni karakter"
-//            );
-//        }
-//
-//        if (request.getDatumRodjenja() == null || !request.getDatumRodjenja().isBefore(LocalDate.now())) {
-//            throw new IllegalArgumentException("Datum rođenja mora biti u prošlosti");
-//        }
-//
-//        Korisnik korisnik = new Korisnik();
-//        korisnik.setIme(request.getIme());
-//        korisnik.setPrezime(request.getPrezime());
-//        korisnik.setEmail(request.getEmail());
-//        korisnik.setLozinka(passwordEncoder.encode(request.getLozinka()));
-//        korisnik.setRola(Role.CITIZEN);
-//        korisnik.setDatumRodjenja(request.getDatumRodjenja());
-//        korisnik.setJmbg(generisiJmbg(request.getDatumRodjenja()));
-//        korisnik.setGrad(request.getGrad());
-//        korisnik.setAdresa(request.getAdresa());
-//        korisnik.setPol(request.getPol());
-//
-//        Korisnik savedUser = korisnikRepository.save(korisnik);
-//        return new RegisterResponse(
-//                savedUser.getKorisnikID(),
-//                savedUser.getIme(),
-//                savedUser.getPrezime(),
-//                savedUser.getEmail(),
-//                savedUser.getGrad(),
-//                savedUser.getAdresa(),
-//                savedUser.getJmbg(),
-//                savedUser.getPol()
-//        );
-//
-//    }
 
     public String registerAndLinkToAuth0(RegisterRequest request) {
         if (korisnikRepository.existsByEmail(request.getEmail().toLowerCase())) {
@@ -92,14 +45,15 @@ public class KorisnikService {
 
         Korisnik k = Korisnik.builder()
                 .email(request.getEmail())
-                .ime(request.getIme())
-                .prezime(request.getPrezime())
-                .pol(request.getPol())
-                .datumRodjenja(request.getDatumRodjenja())
-                .rola(Role.CITIZEN)
-                .grad(request.getGrad())
-                .adresa(request.getAdresa())
+                .firstName(request.getIme())
+                .lastName(request.getPrezime())
+                .gender(request.getPol())
+                .dateOfBirth(request.getDatumRodjenja())
+                .role(Role.CITIZEN)
+                .city(request.getGrad())
+                .address(request.getAdresa())
                 .jmbg(generisiJmbg(request.getDatumRodjenja()))
+                .region(request.getRegion())
                 .auth0UserId(auth0UserId)
                 .build();
 
@@ -109,21 +63,12 @@ public class KorisnikService {
 
         client.updateUserMetadata(auth0UserId, Map.of(
                 "service", "mup",
-                "profileId", k.getKorisnikID().toString()
+                "profileId", k.getId().toString()
         )).block();
 
+        sendUserDataToStatisticsService(k);
         return auth0UserId;
     }
-//
-//    public LoginResponse prijava(LoginRequest request) {
-//        Korisnik korisnik = korisnikRepository.findByEmail(request.getEmail())
-//                .filter(k -> passwordEncoder.matches(request.getLozinka(), k.getLozinka()))
-//                .orElseThrow(() -> new IllegalArgumentException("Neispravan email ili lozinka"));
-//
-//        String token = jwtService.generateToken(korisnik.getEmail(), korisnik.getRola());
-//
-//        return new LoginResponse(token);
-//    }
 
     private String generisiJmbg(LocalDate datumRodjenja) {
         String dan = String.format("%02d", datumRodjenja.getDayOfMonth());
@@ -140,4 +85,44 @@ public class KorisnikService {
         return dan + mesec + godina + rrr + ccck;
     }
 
+    private void sendUserDataToStatisticsService(Korisnik korisnik) {
+        UserSyncRequest request = new UserSyncRequest(
+                korisnik.getEmail(), korisnik.getFirstName(), korisnik.getLastName(),
+                korisnik.getDateOfBirth(),korisnik.getCity(),korisnik.getAddress(),
+                korisnik.getRegion(),korisnik.getJmbg(),korisnik.getGender(),
+                korisnik.getCreatedAt(),korisnik.getRole(),korisnik.getAuth0UserId()
+        );
+        zzsClient.sendUserDataToStatisticsService(request);
+    }
+
+    public void updateDbWithUserFromStatisticsService(UserSyncRequest r) {
+        Korisnik u = Korisnik.builder()
+                .email(r.email())
+                .firstName(r.firstName())
+                .lastName(r.lastName())
+                .dateOfBirth(r.dateOfBirth())
+                .city(r.city())
+                .address(r.address())
+                .region(r.region())
+                .jmbg(r.jmbg())
+                .gender(r.gender())
+                .createdAt(r.createdAt())
+                .role(r.role())
+                .auth0UserId(r.auth0UserId())
+                .build();
+
+        if (u == null || u.getEmail() == null) {
+            log.debug("[MupService] updateDbWithUSerFromStatisticsService user is null");
+            return;
+        }
+
+        boolean exists = korisnikRepository.existsByEmail(u.getEmail());
+
+        if (exists) {
+            log.error("[MupService] updateDbWithUSerFromStatisticsService user already exists");
+            return;
+        }
+
+        korisnikRepository.save(u);
+    }
 }

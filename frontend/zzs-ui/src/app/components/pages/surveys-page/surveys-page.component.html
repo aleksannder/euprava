@@ -1,0 +1,22 @@
+<div class="survey-page">
+  <h1 class="page-title">Ankete</h1>
+
+  <div class="cards-container">
+    <mat-card *ngFor="let s of surveys" class="survey-card"
+              (click)="!(s.responded || !s.active) && openSurveyFill(s.id!)"
+              [class.disabled]="s.responded"
+              [matTooltip]="s.responded ? 'Već ste popunili ovu anketu' : (!s.active ? 'Anketa je zatvorena' : '')">
+      <mat-card-title>{{s.title}}</mat-card-title>
+      <mat-card-subtitle>{{SurveyDomainUtil.getLabel(s.domain)}}</mat-card-subtitle>
+      <p>Status: {{s.active ? 'Otvorena' : 'Zatvorena'}}</p>
+
+      <ng-container *ngIf="isAnalyst$ | async">
+        <button mat-flat-button color="primary"
+                (click)="closeSurvey(s.id!)" *ngIf="s.active && !s.responded">
+          Zatvori anketu
+        </button>
+      </ng-container>
+
+    </mat-card>
+  </div>
+</div>

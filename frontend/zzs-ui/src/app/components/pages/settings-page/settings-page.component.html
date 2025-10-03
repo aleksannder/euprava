@@ -1,0 +1,68 @@
+<div class="settings-container">
+  <h2>Izmena ličnih podataka</h2>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+    <!-- Ime -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Ime</mat-label>
+      <input matInput formControlName="firstName" required>
+    </mat-form-field>
+
+    <!-- Prezime -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Prezime</mat-label>
+      <input matInput formControlName="lastName" required>
+    </mat-form-field>
+
+    <!-- Email (readonly) -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Email</mat-label>
+      <input matInput formControlName="email" readonly>
+    </mat-form-field>
+
+    <!-- JMBG (readonly) -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>JMBG</mat-label>
+      <input matInput formControlName="jmbg" readonly>
+    </mat-form-field>
+
+    <!-- Grad -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Grad</mat-label>
+      <input matInput formControlName="city" required>
+    </mat-form-field>
+
+    <!-- Adresa -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Adresa</mat-label>
+      <input matInput formControlName="address" required>
+    </mat-form-field>
+
+    <!-- Region -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Region</mat-label>
+      <mat-select formControlName="region" required>
+        <mat-option *ngFor="let region of regions" [value]="region">
+          {{ RegionUtil.getLabel(region) }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Pol -->
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Pol</mat-label>
+      <mat-select formControlName="gender" required>
+        <mat-option value="M">Muški</mat-option>
+        <mat-option value="Ž">Ženski</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Dugme -->
+    <div class="actions">
+      <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+        Sačuvaj izmene
+      </button>
+    </div>
+  </form>
+</div>

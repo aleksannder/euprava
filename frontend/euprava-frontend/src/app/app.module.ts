@@ -5,7 +5,7 @@ import { AppComponent } from './app.component';
 import { LoginComponent } from './components/login/login.component';
 import { RegisterComponent } from './components/register/register.component';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
-import { HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
+import {HttpClientModule, HTTP_INTERCEPTORS, provideHttpClient, withInterceptors} from "@angular/common/http";
 import { CustomAlertComponent } from './components/custom-alert/custom-alert.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import {authInterceptor} from "./interceptor/AuthInterceptor";
@@ -17,6 +17,7 @@ import {CommonModule} from "@angular/common";
 import { OruzjeComponent } from './components/oruzje/oruzje.component';
 import { OstaloComponent } from './components/ostalo/ostalo.component';
 import {AuthModule} from "@auth0/auth0-angular";
+import {SurveysComponent} from "./components/surveys/surveys.component";
 
 const AUTH0_DOMAIN: string = 'dev-7wsgpcp2kp2ul4ct.us.auth0.com';
 const AUTH0_CLIENT_ID: string = 'RXUhNLnPVrqyzaMtQc5OgAVOg8Gu35WI';
@@ -34,6 +35,7 @@ const AUTH0_IDENTIFIER: string = 'https://api.shared';
     VozackaComponent,
     SaobracajnaComponent,
     OruzjeComponent,
+    SurveysComponent,
     OstaloComponent
   ],
   imports: [
@@ -49,19 +51,13 @@ const AUTH0_IDENTIFIER: string = 'https://api.shared';
       authorizationParams: {
         redirect_uri: window.location.origin,
         audience: AUTH0_IDENTIFIER,
-        scope: 'openid profile email'
+        scope: 'openid profile email offline_access'
       },
-      cacheLocation: 'localstorage',
-      useRefreshTokens: true
+      useRefreshTokens: true,
+      cacheLocation: 'localstorage'
     }),
   ],
-  providers: [
-    {
-      provide: HTTP_INTERCEPTORS,
-      useValue: authInterceptor,
-      multi: true
-    }
-  ],
+  providers: [provideHttpClient(withInterceptors([authInterceptor]))],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

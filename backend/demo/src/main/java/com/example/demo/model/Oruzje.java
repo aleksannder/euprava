@@ -9,35 +9,37 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "gun_permits")
 public class Oruzje {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
-    @JoinColumn(name = "korisnik_id")
-    private Korisnik korisnik;
 
-    private String ime;
-    private String prezime;
-    private LocalDate datumOd;
-    private LocalDate datumDo;
-    private String regBroj;
-    private String kategorijaOruzja;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private Korisnik user;
+
+    private String firstName;
+    private String lastName;
+    private LocalDate dateFrom;
+    private LocalDate dateTo;
+    private String registrationNumber;
+    private String gunCategory;
 
     @Enumerated(EnumType.STRING)
     private StatusZahteva status;
 
     public static Oruzje kreiraj(String ime, String prezime, LocalDate datumOd, LocalDate datumDo, String regBroj, String kategorijaOruzja, Korisnik korisnik) {
         return Oruzje.builder()
-                .ime(ime)
-                .prezime(prezime)
-                .datumOd(datumOd)
-                .datumDo(datumDo)
-                .regBroj(regBroj)
-                .kategorijaOruzja(kategorijaOruzja)
+                .firstName(ime)
+                .lastName(prezime)
+                .dateFrom(datumOd)
+                .dateTo(datumDo)
+                .registrationNumber(regBroj)
+                .gunCategory(kategorijaOruzja)
                 .status(StatusZahteva.CEKANJE)
-                .korisnik(korisnik)
+                .user(korisnik)
                 .build();
     }
 

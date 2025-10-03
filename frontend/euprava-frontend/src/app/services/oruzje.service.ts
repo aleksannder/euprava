@@ -1,15 +1,16 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import {AuthTokenUtil} from "../interceptor/auth-token.util";
 
 export interface Oruzje {
   id: number;
-  ime: string;
-  prezime: string;
-  datumOd: string;
-  datumDo: string;
-  regBroj: string;
-  kategorijaOruzja: string;
+  firstName: string;
+  lastName: string;
+  dateFrom: string;
+  dateTo: string;
+  registrationNumber: string;
+  gunCategories: string;
   status: 'CEKANJE' | 'DOZVOLJEN' | 'ODBIJEN'| 'IZGUBLJEN';
 }
 
@@ -18,16 +19,16 @@ export interface Oruzje {
 })
 export class OruzjeService {
 
-  private baseUrl = 'http://localhost:8080/oruzje';
-
-  constructor(private http: HttpClient) { }
-
-  podnesiZahtev(zahtev: Partial<Oruzje>): Observable<{ message: string }> {
-    return this.http.post<{ message: string }>(`${this.baseUrl}/zahtev`, zahtev);
+  private baseUrl = 'http://localhost:8081/oruzje';
+  constructor(private http: HttpClient) {
   }
 
-  dohvatiSve(): Observable<Oruzje[]> {
-    return this.http.get<Oruzje[]>(`${this.baseUrl}/svi-zahtevi`);
+  podnesiZahtev(zahtev: Partial<Oruzje>, userEmail: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.baseUrl}/zahtev/${userEmail}`, zahtev);
+  }
+
+  dohvatiSve(userEmail: string): Observable<Oruzje[]> {
+    return this.http.get<Oruzje[]>(`${this.baseUrl}/svi-zahtevi/${userEmail}`);
   }
 
   odobriZahtev(id: number): Observable<{ message: string }> {
